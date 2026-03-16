@@ -350,9 +350,11 @@ export default function App() {
 
   function renderTask(t,idx,arr) {
     const eff=getEff(t,ts);
+    const hasMemo=t.memo&&t.memo.trim();
+    const align=hasMemo?"flex-start":"center";
     return(
-      <div key={t.id} style={{display:"flex",alignItems:"flex-start",gap:12,padding:"11px 16px",minHeight:44,borderBottom:idx===arr.length-1?"none":"0.5px solid "+tk.gray5}}>
-        <button onClick={()=>toggleDone(t.id)} style={{width:22,height:22,borderRadius:"50%",border:t.done?"none":"1.5px solid "+tk.gray3,background:t.done?tk.blue:"transparent",flexShrink:0,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",padding:0,marginTop:1}}>
+      <div key={t.id} style={{display:"flex",alignItems:align,gap:12,padding:"11px 16px",minHeight:44,borderBottom:idx===arr.length-1?"none":"0.5px solid "+tk.gray5}}>
+        <button onClick={()=>toggleDone(t.id)} style={{width:22,height:22,borderRadius:"50%",border:t.done?"none":"1.5px solid "+tk.gray3,background:t.done?tk.blue:"transparent",flexShrink:0,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",padding:0,marginTop:hasMemo?1:0}}>
           {t.done&&<svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7.5L10 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>}
         </button>
         <div style={{flex:1,minWidth:0,opacity:t.done?0.4:1}}>
@@ -361,15 +363,17 @@ export default function App() {
             {t.schedule==="date"&&t.schedule_date&&<Badge color={t.schedule_date<=ts?tk.orange:tk.blue}>{fmtDate(t.schedule_date)}</Badge>}
             {t.due&&(isOD(t.due)?<Badge color={tk.red}>{fmtDate(t.due)}{" 초과"}</Badge>:isTD(t.due)?<Badge color={tk.orange}>{"오늘 마감"}</Badge>:isDS(t.due)?<Badge color={tk.orange}>{"~"}{fmtDate(t.due)}</Badge>:<Badge color={tk.gray1}>{"~"}{fmtDate(t.due)}</Badge>)}
           </div>
-          {t.memo&&<p style={{fontSize:13,color:tk.gray1,margin:"2px 0 0",whiteSpace:"pre-line",textAlign:"left"}}>{t.memo}</p>}
+          {hasMemo&&<p style={{fontSize:13,color:tk.gray1,margin:"2px 0 0",whiteSpace:"pre-line",textAlign:"left"}}>{t.memo}</p>}
         </div>
-        {!t.done&&(
-          <button onClick={()=>moveTask(t)} title={eff==="today"?"백로그로 이동":"오늘로 이동"} style={{background:"none",border:"none",cursor:"pointer",padding:"0 4px",flexShrink:0,display:"flex",alignItems:"center",marginTop:2}}>
-            {eff==="today"?<IconPinned/>:<IconUnpinned/>}
-          </button>
-        )}
-        <button onClick={()=>startEdit(t)} style={{background:"none",color:tk.blue,border:"none",fontSize:14,cursor:"pointer",padding:"0 6px",fontFamily:font}}>{"편집"}</button>
-        <button onClick={()=>deleteTask(t.id)} style={{background:"none",color:tk.red,border:"none",fontSize:14,cursor:"pointer",padding:"0 6px",fontFamily:font}}>{"삭제"}</button>
+        <div style={{display:"flex",alignItems:"center",flexShrink:0,gap:0}}>
+          {!t.done&&(
+            <button onClick={()=>moveTask(t)} title={eff==="today"?"백로그로 이동":"오늘로 이동"} style={{background:"none",border:"none",cursor:"pointer",padding:"0 6px",display:"flex",alignItems:"center"}}>
+              {eff==="today"?<IconPinned/>:<IconUnpinned/>}
+            </button>
+          )}
+          <button onClick={()=>startEdit(t)} style={{background:"none",color:tk.blue,border:"none",fontSize:14,cursor:"pointer",padding:"0 6px",fontFamily:font,display:"flex",alignItems:"center"}}>{"편집"}</button>
+          <button onClick={()=>deleteTask(t.id)} style={{background:"none",color:tk.red,border:"none",fontSize:14,cursor:"pointer",padding:"0 6px",fontFamily:font,display:"flex",alignItems:"center"}}>{"삭제"}</button>
+        </div>
       </div>
     );
   }
@@ -492,7 +496,7 @@ export default function App() {
         )}
         <div style={{display:"flex",gap:8}}>
           <button onClick={()=>setShowProjMgr(v=>!v)} style={{background:tk.bgCard,color:tk.blue,border:"0.5px solid "+tk.gray4,borderRadius:tk.radius,padding:"0 14px",height:34,fontSize:14,cursor:"pointer",fontFamily:font}}>{"과제 관리"}</button>
-          <button onClick={()=>{setShowForm(v=>!v);setEditId(null);}} style={{background:tk.blue,color:"#fff",border:"none",borderRadius:tk.radius,padding:"0 14px",height:34,fontSize:14,fontWeight:500,cursor:"pointer",fontFamily:font}}>{"+ 추가"}</button>
+          <button onClick={()=>{setShowForm(v=>!v);setEditId(null);}} style={{background:tk.blue,color:"#fff",border:"none",borderRadius:tk.radius,padding:"0 14px",height:34,fontSize:14,fontWeight:500,cursor:"pointer",fontFamily:font}}>{"+ 할 일 추가"}</button>
         </div>
       </div>
 
