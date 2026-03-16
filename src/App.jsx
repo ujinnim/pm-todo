@@ -278,6 +278,9 @@ export default function App() {
     setProjects(ps => [...ps, { id: Date.now(), name, color: newProjColor, openDate: newProjOpenDate }]);
     setNewProjName(""); setNewProjColor(COLORS[0]); setNewProjOpenDate("");
   }
+  function toggleProjDone(id) {
+    setProjects(ps => ps.map(p => p.id === id ? { ...p, done: !p.done } : p));
+  }
   function deleteProject(id) {
     if (!window.confirm("과제를 삭제할까요?")) return;
     setProjects(ps => ps.filter(p => p.id !== id));
@@ -485,11 +488,10 @@ export default function App() {
   }
 
   const tabs = [
+    { key: "all", label: "전체", count: undone.length },
     { key: "today", label: "오늘", count: todayCount },
     { key: "backlog", label: "백로그", count: backlogCount },
-    { key: "all", label: "전체", count: undone.length },
     { key: "done", label: "완료", count: done.length },
-    { key: "schedule", label: "일정", count: 0 },
   ];
 
   return (
@@ -541,6 +543,7 @@ export default function App() {
                         <div style={{ fontSize: 15 }}>{p.name}</div>
                         {p.openDate && <div style={{ fontSize: 12, color: tk.gray1, marginTop: 2 }}>오픈일 {fmtDate(p.openDate)}</div>}
                       </div>
+                      <button onClick={() => toggleProjDone(p.id)} style={{ ...selStyle, color: tk.gray1, fontSize: 12 }}>완료</button>
                       <button onClick={() => { setEditingProjId(p.id); setEditingProjName(p.name); setEditingProjColor(p.color); setEditingProjOpenDate(p.openDate || ""); }} style={selStyle}>수정</button>
                       <button onClick={() => deleteProject(p.id)} style={{ ...selStyle, color: tk.red }}>삭제</button>
                     </>
@@ -615,20 +618,41 @@ export default function App() {
           </>
         )}
 
-        <div style={{ display: "flex", background: tk.gray5, borderRadius: tk.radius, padding: 2, margin: "12px 0 4px", gap: 2 }}>
-          {tabs.map(tab => (
-            <button key={tab.key} onClick={() => setView(tab.key)} style={{
-              flex: 1, height: 32, borderRadius: 8, border: "none", cursor: "pointer",
-              fontSize: 12, fontWeight: view === tab.key ? 600 : 400,
-              background: view === tab.key ? "#fff" : "transparent",
-              color: view === tab.key ? tk.label : tk.gray1,
-              boxShadow: view === tab.key ? "0 1px 4px rgba(0,0,0,0.1)" : "none",
-              fontFamily: font, display: "flex", alignItems: "center", justifyContent: "center", gap: 3,
-            }}>
-              {tab.label}
-              {tab.count > 0 && <span style={{ fontSize: 10, fontWeight: 600, background: view === tab.key ? tk.gray5 : "transparent", borderRadius: tk.radiusPill, padding: "0 4px", color: tk.gray1 }}>{tab.count}</span>}
-            </button>
-          ))}
+        <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "12px 0 4px" }}>
+          <div style={{ display: "flex", flex: 1, background: tk.gray5, borderRadius: tk.radius, padding: 2, gap: 2 }}>
+            {tabs.map(tab => (
+              <button key={tab.key} onClick={() => setView(tab.key)} style={{
+                flex: 1, height: 32, borderRadius: 8, border: "none", cursor: "pointer",
+                fontSize: 12, fontWeight: view === tab.key ? 600 : 400,
+                background: view === tab.key ? "#fff" : "transparent",
+                color: view === tab.key ? tk.label : tk.gray1,
+                boxShadow: view === tab.key ? "0 1px 4px rgba(0,0,0,0.1)" : "none",
+                fontFamily: font, display: "flex", alignItems: "center", justifyContent: "center", gap: 3,
+              }}>
+                {tab.label}
+                {tab.count > 0 && <span style={{ fontSize: 10, fontWeight: 600, background: view === tab.key ? tk.gray5 : "transparent", borderRadius: tk.radiusPill, padding: "0 4px", color: tk.gray1 }}>{tab.count}</span>}
+              </button>
+            ))}
+          </div>
+          <button onClick={() => setView(v => v === "schedule" ? "all" : "schedule")} style={{
+            width: 36, height: 36, borderRadius: tk.radius, border: `0.5px solid ${tk.gray4}`,
+            background: view === "schedule" ? tk.blue : tk.bgCard,
+            color: view === "schedule" ? "#fff" : tk.gray1,
+            cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+            fontSize: 16, lineHeight: 1,
+          }}>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="1" y="2.5" width="14" height="12.5" rx="2.5" fill={view === "schedule" ? "#fff" : tk.gray4} />
+              <rect x="1" y="2.5" width="14" height="4.5" rx="2.5" fill={view === "schedule" ? "rgba(255,255,255,0.3)" : tk.gray2} />
+              <rect x="1" y="5" width="14" height="2" fill={view === "schedule" ? "rgba(255,255,255,0.3)" : tk.gray2} />
+              <rect x="4.5" y="9" width="2" height="2" rx="0.5" fill={view === "schedule" ? tk.blue : tk.gray1} />
+              <rect x="7.5" y="9" width="2" height="2" rx="0.5" fill={view === "schedule" ? tk.blue : tk.gray1} />
+              <rect x="10.5" y="9" width="2" height="2" rx="0.5" fill={view === "schedule" ? tk.blue : tk.gray1} />
+              <rect x="4.5" y="12" width="2" height="2" rx="0.5" fill={view === "schedule" ? tk.blue : tk.gray1} />
+              <rect x="7.5" y="12" width="2" height="2" rx="0.5" fill={view === "schedule" ? tk.blue : tk.gray1} />
+              <line x1="5" y1="1" x2="5" y2="4" stroke={view === "schedule" ? "#fff" : tk.gray2} strokeWidth="1.5" strokeLinecap="round" />
+              <line x1="11" y1="1" x2="11" y2="4" stroke={view === "schedule" ? "#fff" : tk.gray2} strokeWidth="1.5" strokeLinecap="round" />
+            </svg></button>
         </div>
 
         {view === "schedule" ? renderScheduleTab() : renderGroups(getFiltered())}
