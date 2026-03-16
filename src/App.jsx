@@ -543,9 +543,9 @@ export default function App() {
                         <div style={{ fontSize: 15 }}>{p.name}</div>
                         {p.openDate && <div style={{ fontSize: 12, color: tk.gray1, marginTop: 2 }}>오픈일 {fmtDate(p.openDate)}</div>}
                       </div>
-                      <button onClick={() => toggleProjDone(p.id)} style={{ ...selStyle, color: tk.gray1, fontSize: 12 }}>완료</button>
-                      <button onClick={() => { setEditingProjId(p.id); setEditingProjName(p.name); setEditingProjColor(p.color); setEditingProjOpenDate(p.openDate || ""); }} style={selStyle}>수정</button>
-                      <button onClick={() => deleteProject(p.id)} style={{ ...selStyle, color: tk.red }}>삭제</button>
+                      <button onClick={(e) => { e.stopPropagation(); toggleProjDone(p.id); }} style={{ background: tk.gray5, color: tk.gray1, border: "none", borderRadius: 6, fontSize: 12, padding: "4px 10px", cursor: "pointer", fontFamily: font }}>완료</button>
+                      <button onClick={(e) => { e.stopPropagation(); setEditingProjId(p.id); setEditingProjName(p.name); setEditingProjColor(p.color); setEditingProjOpenDate(p.openDate || ""); }} style={selStyle}>수정</button>
+                      <button onClick={(e) => { e.stopPropagation(); deleteProject(p.id); }} style={{ ...selStyle, color: tk.red }}>삭제</button>
                     </>
                   )}
                 </Row>
