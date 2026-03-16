@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 
 const TASKS_KEY = "pm_tasks";
 const PROJECTS_KEY = "pm_projects";
+const TITLE_KEY = "pm_title";
 
 function load(key, fallback) {
   try { return JSON.parse(localStorage.getItem(key) || "null") ?? fallback; } catch { return fallback; }
@@ -19,7 +20,7 @@ function fmtDate(d) { if (!d) return ""; const [,m,day] = d.split("-"); return `
 const COLORS = ["#7F77DD","#1D9E75","#D85A30","#D4537E","#378ADD","#639922","#BA7517","#E24B4A"];
 
 const token = {
-  blue: "#0069FF", blueHover: "#0057D6", blueLight: "#EBF2FF",
+  blue: "#0069FF", blueLight: "#EBF2FF",
   gray100: "#F4F4F5", gray200: "#E4E4E7", gray400: "#A1A1AA",
   gray600: "#52525B", gray900: "#18181B",
   radius: "8px", radiusLg: "12px", radiusPill: "999px",
@@ -40,8 +41,7 @@ const s = {
 function getEffectiveSchedule(task, todayStr) {
   if (task.schedule === "today") return "today";
   if (task.schedule === "date" && task.scheduleDate) {
-    if (task.scheduleDate <= todayStr) return "today";
-    return "backlog";
+    return task.scheduleDate <= todayStr ? "today" : "backlog";
   }
   if (task.schedule === "tomorrow") return "backlog";
   return "none";
@@ -66,6 +66,10 @@ function ColorPicker({ value, onChange }) {
 export default function App() {
   const [tasks, setTasks] = useState(() => load(TASKS_KEY, []));
   const [projects, setProjects] = useState(() => load(PROJECTS_KEY, []));
+  const [appTitle, setAppTitle] = useState(() => load(TITLE_KEY, "할 일"));
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [form, setForm] = useState({ title: "", memo: "", due: "", schedule: "today", scheduleDate: "", projectId: "" });
+  const [editId, setEditId] = useState(null);
   const [view, setView] = useState("today");
   const [showForm, setShowForm] = useState(false);
   const [showProjMgr, setShowProjMgr] = useState(false);
@@ -74,14 +78,10 @@ export default function App() {
   const [editingProjId, setEditingProjId] = useState(null);
   const [editingProjName, setEditingProjName] = useState("");
   const [editingProjColor, setEditingProjColor] = useState("");
-  const [editId, setEditId] = useState(null);
-  const [editingTitle, setEditingTitle] = useState(false);
-  const [appTitle, setAppTitle] = useState(() => load("pm_title", "할 일"));
-
-  useEffect(() => { save("pm_title", appTitle); }, [appTitle]);
 
   useEffect(() => { save(TASKS_KEY, tasks); }, [tasks]);
   useEffect(() => { save(PROJECTS_KEY, projects); }, [projects]);
+  useEffect(() => { save(TITLE_KEY, appTitle); }, [appTitle]);
 
   const todayStr = today();
   const isOverdue = d => d && d < todayStr;
@@ -125,14 +125,6 @@ export default function App() {
 
   function toggleDone(id) { setTasks(ts => ts.map(t => t.id === id ? { ...t, done: !t.done } : t)); }
 
-  function cycleSchedule(id) {
-    setTasks(ts => ts.map(t => {
-      if (t.id !== id) return t;
-      const next = t.schedule === "today" ? "tomorrow" : t.schedule === "tomorrow" ? "none" : "today";
-      return { ...t, schedule: next, scheduleDate: "" };
-    }));
-  }
-
   function deleteTask(id) {
     if (!window.confirm("할 일을 삭제할까요?")) return;
     setTasks(ts => ts.filter(t => t.id !== id));
@@ -173,13 +165,6 @@ export default function App() {
     return order.filter(k => groups[k]).map(k => ({ key: k, tasks: groups[k] }));
   }
 
-  const scheduleIcon = t => {
-    if (t.schedule === "today") return { icon: "★", color: "#F59E0B" };
-    if (t.schedule === "date" && t.scheduleDate) return { icon: "★", color: token.blue };
-    if (t.schedule === "tomorrow") return { icon: "★", color: token.blue };
-    return { icon: "☆", color: token.gray400 };
-  };
-
   function dueBadge(due) {
     if (!due) return null;
     if (isOverdue(due)) return <span style={s.badge("#E53E3E")}>{fmtDate(due)} 초과</span>;
@@ -195,7 +180,6 @@ export default function App() {
   }
 
   function renderTask(t, idx) {
-    const si = scheduleIcon(t);
     return (
       <div key={t.id} style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "12px 0", borderTop: idx === 0 ? `1px solid ${token.gray200}` : "none", borderBottom: `1px solid ${token.gray200}`, opacity: t.done ? 0.45 : 1 }}>
         <input type="checkbox" checked={t.done} onChange={() => toggleDone(t.id)} style={{ marginTop: 3, cursor: "pointer", flexShrink: 0, width: 16, height: 16, accentColor: token.blue }} />
@@ -240,20 +224,14 @@ export default function App() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
         <div>
           {editingTitle ? (
-            <input
-              value={appTitle}
-              onChange={e => setAppTitle(e.target.value)}
+            <input value={appTitle} onChange={e => setAppTitle(e.target.value)}
               onBlur={() => setEditingTitle(false)}
               onKeyDown={e => { if (e.key === "Enter" || e.key === "Escape") setEditingTitle(false); }}
               autoFocus
-              style={{ fontSize: 20, fontWeight: 700, color: token.gray900, border: "none", borderBottom: `2px solid ${token.blue}`, outline: "none", background: "transparent", width: 200, padding: "0 2px" }}
-            />
+              style={{ fontSize: 20, fontWeight: 700, color: token.gray900, border: "none", borderBottom: `2px solid ${token.blue}`, outline: "none", background: "transparent", width: 200, padding: "0 2px" }} />
           ) : (
-            <h1
-              onClick={() => setEditingTitle(true)}
-              title="클릭해서 수정"
-              style={{ fontSize: 20, fontWeight: 700, margin: 0, color: token.gray900, cursor: "pointer" }}
-            >{appTitle}</h1>
+            <h1 onClick={() => setEditingTitle(true)} title="클릭해서 수정"
+              style={{ fontSize: 20, fontWeight: 700, margin: 0, color: token.gray900, cursor: "pointer" }}>{appTitle}</h1>
           )}
           <p style={{ fontSize: 13, color: token.gray400, margin: "2px 0 0" }}>{todayStr.replace(/-/g, ".")}</p>
         </div>
@@ -366,8 +344,6 @@ export default function App() {
       </div>
 
       {renderGroups(getFiltered())}
-
- 
     </div>
   );
 }
