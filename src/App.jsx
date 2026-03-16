@@ -548,7 +548,7 @@ export default function App() {
                       <button onClick={(e) => { e.stopPropagation(); deleteProject(p.id); }} style={{ ...selStyle, color: tk.red }}>삭제</button>
                     </>
                   )}
-                </Row>
+                </div>
               ))}
             </GroupCard>
             <GroupCard>
