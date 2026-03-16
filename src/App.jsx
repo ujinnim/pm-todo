@@ -56,7 +56,6 @@ function Confetti({ onDone }) {
     const cy = canvas.height / 2;
     const colors = ["#007AFF","#FF3B30","#FF9500","#34C759","#7F77DD","#D4537E","#FFD60A","#30D158"];
     const particles = [];
-    // 3번 연속 폭죽
     function burst(ox, oy, count) {
       for (let i = 0; i < count; i++) {
         const angle = (Math.PI * 2 * i) / count + Math.random() * 0.3;
@@ -80,7 +79,6 @@ function Confetti({ onDone }) {
     setTimeout(function() { burst(cx * 0.4, cy * 0.6, 40); }, 200);
     setTimeout(function() { burst(cx * 1.6, cy * 0.6, 40); }, 350);
     setTimeout(function() { burst(cx, cy * 0.3, 30); }, 500);
-
     let frame;
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -89,11 +87,8 @@ function Confetti({ onDone }) {
         const p = particles[i];
         if (p.alpha <= 0) continue;
         alive = true;
-        p.vx *= p.drag;
-        p.vy *= p.drag;
-        p.vy += p.gravity;
-        p.x += p.vx;
-        p.y += p.vy;
+        p.vx *= p.drag; p.vy *= p.drag; p.vy += p.gravity;
+        p.x += p.vx; p.y += p.vy;
         p.rotation += p.rotationSpeed;
         p.alpha -= 0.012;
         ctx.save();
@@ -102,19 +97,13 @@ function Confetti({ onDone }) {
         ctx.translate(p.x, p.y);
         ctx.rotate(p.rotation);
         if (p.shape === "circle") {
-          ctx.beginPath();
-          ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
-          ctx.fill();
+          ctx.beginPath(); ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2); ctx.fill();
         } else {
           ctx.fillRect(-p.size / 2, -p.size / 2 * 1.6, p.size, p.size * 1.6);
         }
         ctx.restore();
       }
-      if (alive) {
-        frame = requestAnimationFrame(draw);
-      } else {
-        onDone();
-      }
+      if (alive) { frame = requestAnimationFrame(draw); } else { onDone(); }
     }
     frame = requestAnimationFrame(draw);
     return function() { cancelAnimationFrame(frame); };
@@ -130,9 +119,7 @@ function ColorPicker({ value, onChange }) {
       {open && (
         <div style={{ position: "fixed", zIndex: 1000, background: tk.bgCard, border: "0.5px solid " + tk.gray4, borderRadius: tk.radius, padding: "10px", display: "flex", gap: 8, flexWrap: "wrap", width: 148, boxShadow: "0 8px 24px rgba(0,0,0,0.12)" }}>
           {COLORS.map(function(c) {
-            return (
-              <button key={c} onClick={() => { onChange(c); setOpen(false); }} style={{ width: 22, height: 22, borderRadius: "50%", background: c, border: "none", cursor: "pointer", padding: 0, outline: value === c ? "2.5px solid " + c : "none", outlineOffset: 2 }} />
-            );
+            return <button key={c} onClick={() => { onChange(c); setOpen(false); }} style={{ width: 22, height: 22, borderRadius: "50%", background: c, border: "none", cursor: "pointer", padding: 0, outline: value === c ? "2.5px solid " + c : "none", outlineOffset: 2 }} />;
           })}
         </div>
       )}
@@ -156,8 +143,7 @@ function Badge({ color, children }) {
 function DraggableCalendar({ phases, projects, calDate, setCalDate, onUpdatePhase }) {
   const [dragging, setDragging] = useState(null);
   const [hoverDay, setHoverDay] = useState(null);
-  const y = calDate.y;
-  const m = calDate.m;
+  const y = calDate.y; const m = calDate.m;
   const firstDay = new Date(y, m, 1).getDay();
   const daysInMonth = new Date(y, m + 1, 0).getDate();
   const monthStr = y + "-" + String(m + 1).padStart(2, "0");
@@ -165,20 +151,14 @@ function DraggableCalendar({ phases, projects, calDate, setCalDate, onUpdatePhas
   const cells = [];
   for (let i = 0; i < firstDay; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
-  const visiblePhases = phases.filter(function(ph) {
-    return ph.start && ph.end && ph.start.slice(0,7) <= monthStr && ph.end.slice(0,7) >= monthStr;
-  });
+  const visiblePhases = phases.filter(function(ph) { return ph.start && ph.end && ph.start.slice(0,7) <= monthStr && ph.end.slice(0,7) >= monthStr; });
   const dayNames = ["일","월","화","수","목","금","토"];
-
-  function getDayStr(d) {
-    return y + "-" + String(m+1).padStart(2,"0") + "-" + String(d).padStart(2,"0");
-  }
+  function getDayStr(d) { return y + "-" + String(m+1).padStart(2,"0") + "-" + String(d).padStart(2,"0"); }
   function getPreviewDates(ph) {
     if (!dragging || dragging.phaseId !== ph.id || !hoverDay) return { start: ph.start, end: ph.end };
     const delta = diffDays(dragging.startDayStr, hoverDay);
     return { start: addDays(dragging.origStart, delta), end: addDays(dragging.origEnd, delta) };
   }
-
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
@@ -195,33 +175,21 @@ function DraggableCalendar({ phases, projects, calDate, setCalDate, onUpdatePhas
           const dateStr = getDayStr(d);
           const isToday = dateStr === todayStr;
           const isHover = hoverDay === dateStr && dragging;
-          const dayPhases = visiblePhases.filter(function(ph) {
-            const dates = getPreviewDates(ph);
-            return dates.start <= dateStr && dates.end >= dateStr;
-          });
+          const dayPhases = visiblePhases.filter(function(ph) { const dt = getPreviewDates(ph); return dt.start <= dateStr && dt.end >= dateStr; });
           return (
-            <div key={d} data-day={dateStr}
-              onDragOver={function(e) { e.preventDefault(); setHoverDay(dateStr); }}
-              onDrop={function(e) {
-                e.preventDefault();
-                if (!dragging) return;
-                const delta = diffDays(dragging.startDayStr, dateStr);
-                if (delta !== 0) onUpdatePhase(dragging.phaseId, { start: addDays(dragging.origStart, delta), end: addDays(dragging.origEnd, delta) });
-                setDragging(null); setHoverDay(null);
-              }}
+            <div key={d} onDragOver={function(e) { e.preventDefault(); setHoverDay(dateStr); }}
+              onDrop={function(e) { e.preventDefault(); if (!dragging) return; const delta = diffDays(dragging.startDayStr, dateStr); if (delta !== 0) onUpdatePhase(dragging.phaseId, { start: addDays(dragging.origStart, delta), end: addDays(dragging.origEnd, delta) }); setDragging(null); setHoverDay(null); }}
               style={{ minHeight: 64, padding: "4px 3px", background: isHover ? tk.blueLight : isToday ? "#F0F7FF" : "transparent", borderRadius: 8 }}>
               <div style={{ textAlign: "center", fontSize: 13, fontWeight: isToday ? 700 : 400, color: isToday ? tk.blue : tk.label, marginBottom: 3 }}>{d}</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 {dayPhases.slice(0, 3).map(function(ph) {
-                  const dates = getPreviewDates(ph);
-                  const isStart = dates.start === dateStr;
-                  const isEnd = dates.end === dateStr;
+                  const dt = getPreviewDates(ph);
                   return (
-                    <div key={ph.id} draggable data-day={dateStr}
+                    <div key={ph.id} draggable
                       onDragStart={function(e) { e.stopPropagation(); setDragging({ phaseId: ph.id, startDayStr: dateStr, origStart: ph.start, origEnd: ph.end }); e.dataTransfer.effectAllowed = "move"; }}
                       onDragEnd={function() { setDragging(null); setHoverDay(null); }}
-                      style={{ background: ph.color, color: "#fff", fontSize: 10, fontWeight: 500, padding: "2px 5px", borderRadius: isStart && isEnd ? 4 : isStart ? "4px 0 0 4px" : isEnd ? "0 4px 4px 0" : 0, overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis", cursor: "grab", opacity: dragging && dragging.phaseId === ph.id ? 0.5 : 1, userSelect: "none" }}>
-                      {isStart ? ph.name : "\u00A0"}
+                      style={{ background: ph.color, color: "#fff", fontSize: 10, fontWeight: 500, padding: "2px 5px", borderRadius: dt.start === dateStr && dt.end === dateStr ? 4 : dt.start === dateStr ? "4px 0 0 4px" : dt.end === dateStr ? "0 4px 4px 0" : 0, overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis", cursor: "grab", opacity: dragging && dragging.phaseId === ph.id ? 0.5 : 1, userSelect: "none" }}>
+                      {dt.start === dateStr ? ph.name : "\u00A0"}
                     </div>
                   );
                 })}
@@ -235,12 +203,12 @@ function DraggableCalendar({ phases, projects, calDate, setCalDate, onUpdatePhas
         <div style={{ marginTop: 16, display: "flex", flexWrap: "wrap", gap: 8 }}>
           {visiblePhases.map(function(ph) {
             const proj = projects.find(function(p) { return p.id === ph.projectId; });
-            const dates = getPreviewDates(ph);
+            const dt = getPreviewDates(ph);
             return (
               <div key={ph.id} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: tk.gray1 }}>
                 <span style={{ width: 10, height: 10, borderRadius: 3, background: ph.color, flexShrink: 0 }} />
                 <span style={{ color: tk.label }}>{proj ? proj.name + " · " : ""}{ph.name}</span>
-                <span>{fmtDate(dates.start)}~{fmtDate(dates.end)}</span>
+                <span>{fmtDate(dt.start)}~{fmtDate(dt.end)}</span>
               </div>
             );
           })}
@@ -262,6 +230,7 @@ export default function App() {
   const [view, setView] = useState("all");
   const [showForm, setShowForm] = useState(false);
   const [showProjMgr, setShowProjMgr] = useState(false);
+  const [showNewProjForm, setShowNewProjForm] = useState(false);
   const [newProjName, setNewProjName] = useState("");
   const [newProjColor, setNewProjColor] = useState(COLORS[0]);
   const [newProjOpenDate, setNewProjOpenDate] = useState("");
@@ -293,6 +262,7 @@ export default function App() {
     if (!name) return;
     setProjects(function(ps) { return [...ps, { id: Date.now(), name: name, color: newProjColor, openDate: newProjOpenDate, done: false }]; });
     setNewProjName(""); setNewProjColor(COLORS[0]); setNewProjOpenDate("");
+    setShowNewProjForm(false);
   }
   function deleteProject(id) {
     if (!window.confirm("과제를 삭제할까요?")) return;
@@ -536,9 +506,16 @@ export default function App() {
       </div>
 
       <div style={{ maxWidth: 680, margin: "0 auto", padding: "0 16px 40px" }}>
+
         {showProjMgr && (
           <>
-            <SectionHeader>과제 목록</SectionHeader>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <SectionHeader>과제 목록</SectionHeader>
+              <button onClick={() => setShowNewProjForm(function(v) { return !v; })} style={{ background: "none", border: "none", color: tk.blue, fontSize: 13, cursor: "pointer", fontFamily: font, padding: "0 4px" }}>
+                {showNewProjForm ? "접기" : "+ 추가"}
+              </button>
+            </div>
+
             <GroupCard>
               {projects.filter(function(p) { return !p.done; }).length === 0 && projects.filter(function(p) { return p.done; }).length === 0 && (
                 <div style={{ padding: "11px 16px", color: tk.gray2, fontSize: 15 }}>등록된 과제가 없어요</div>
@@ -604,21 +581,24 @@ export default function App() {
               </>
             )}
 
-            <GroupCard>
-              <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "11px 16px", minHeight: 44 }}>
-                <ColorPicker value={newProjColor} onChange={setNewProjColor} />
-                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
-                  <input placeholder="새 과제 이름" value={newProjName} onChange={function(e) { setNewProjName(e.target.value); }}
-                    onKeyDown={function(e) { if (e.key === "Enter") { e.preventDefault(); addProject(); } }}
-                    style={{ fontSize: 15, border: "none", outline: "none", background: "transparent", fontFamily: font }} />
-                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <span style={{ fontSize: 12, color: tk.gray1 }}>오픈일</span>
-                    <input type="date" value={newProjOpenDate} onChange={function(e) { setNewProjOpenDate(e.target.value); }} style={Object.assign({}, selStyle, { fontSize: 12 })} />
+            {showNewProjForm && (
+              <GroupCard>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "11px 16px", minHeight: 44 }}>
+                  <ColorPicker value={newProjColor} onChange={setNewProjColor} />
+                  <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
+                    <input placeholder="새 과제 이름" value={newProjName} onChange={function(e) { setNewProjName(e.target.value); }}
+                      onKeyDown={function(e) { if (e.key === "Enter") { e.preventDefault(); addProject(); } }}
+                      autoFocus
+                      style={{ fontSize: 15, border: "none", outline: "none", background: "transparent", fontFamily: font }} />
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <span style={{ fontSize: 12, color: tk.gray1 }}>오픈일</span>
+                      <input type="date" value={newProjOpenDate} onChange={function(e) { setNewProjOpenDate(e.target.value); }} style={Object.assign({}, selStyle, { fontSize: 12 })} />
+                    </div>
                   </div>
+                  <button onClick={addProject} style={{ background: tk.blue, color: "#fff", border: "none", borderRadius: 8, padding: "0 14px", height: 32, fontSize: 14, cursor: "pointer", fontFamily: font, flexShrink: 0 }}>추가</button>
                 </div>
-                <button onClick={addProject} style={{ background: tk.blue, color: "#fff", border: "none", borderRadius: 8, padding: "0 14px", height: 32, fontSize: 14, cursor: "pointer", fontFamily: font, flexShrink: 0 }}>추가</button>
-              </div>
-            </GroupCard>
+              </GroupCard>
+            )}
           </>
         )}
 
