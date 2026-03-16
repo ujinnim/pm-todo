@@ -131,7 +131,7 @@ function GroupCard({ children }) {
   return <div style={{ background: tk.bgCard, borderRadius: tk.radiusLg, overflow: "hidden", marginBottom: 8 }}>{children}</div>;
 }
 function Row({ children, last }) {
-  return <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "11px 16px", minHeight: 44, borderBottom: last ? "none" : "0.5px solid " + tk.gray5 }}>{children}</div>;
+  return <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "11px 16px", minHeight: 44, borderBottom: last ? "none" : "0.5px solid " + tk.gray5, textAlign: "left" }}>{children}</div>;
 }
 function SectionHeader({ children }) {
   return <div style={{ fontSize: 12, fontWeight: 600, color: tk.gray1, textTransform: "uppercase", letterSpacing: "0.05em", padding: "20px 4px 6px", display: "flex", alignItems: "center", gap: 6 }}>{children}</div>;
