@@ -123,6 +123,125 @@ function ColorPicker({ value, onChange }) {
   )
 }
 
+// ── Date Range Picker ─────────────────────────────────────────────
+function DateRangePicker({ startDate, endDate, onChange }) {
+  const [open, setOpen] = useState(false)
+  const [step, setStep] = useState("start") // "start" | "end"
+  const [hover, setHover] = useState(null)
+  const [cal, setCal] = useState(() => {
+    const d = startDate ? new Date(startDate) : new Date()
+    return { y: d.getFullYear(), m: d.getMonth() }
+  })
+  const ref = useRef(null)
+  useEffect(() => {
+    function h(e) { if (ref.current && !ref.current.contains(e.target)) { setOpen(false); setStep("start") } }
+    document.addEventListener("mousedown", h)
+    return () => document.removeEventListener("mousedown", h)
+  }, [])
+
+  const { y, m } = cal
+  const firstDay = new Date(y, m, 1).getDay()
+  const daysInMonth = new Date(y, m+1, 0).getDate()
+  const cells = []
+  for (let i=0; i<firstDay; i++) cells.push(null)
+  for (let d=1; d<=daysInMonth; d++) cells.push(d)
+  const dayNames = ["일","월","화","수","목","금","토"]
+  function ds(d) { return y+"-"+String(m+1).padStart(2,"0")+"-"+String(d).padStart(2,"0") }
+
+  const previewEnd = step==="end" && hover ? (hover >= startDate ? hover : startDate) : endDate
+
+  function handleDay(dateStr) {
+    if (step === "start") {
+      onChange({ start_date: dateStr, end_date: endDate && endDate >= dateStr ? endDate : dateStr })
+      setStep("end")
+    } else {
+      if (dateStr < startDate) {
+        onChange({ start_date: dateStr, end_date: startDate })
+      } else {
+        onChange({ start_date: startDate, end_date: dateStr })
+      }
+      setOpen(false); setStep("start"); setHover(null)
+    }
+  }
+
+  const display = startDate && endDate ? `${fmtDate(startDate)} ~ ${fmtDate(endDate)}` : "기간 선택"
+  const nights = startDate && endDate ? diffDays(startDate, endDate) + 1 : null
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        onClick={() => { setOpen(v=>!v); setStep("start") }}
+        className="w-full h-9 rounded-lg border border-gray-200 bg-white pl-3 pr-3 text-sm flex items-center gap-2 hover:border-[#1E5F52] transition-colors"
+      >
+        <Calendar size={13} className="text-gray-400 flex-shrink-0"/>
+        <span className={startDate ? "text-gray-700 flex-1 text-left" : "text-gray-400 flex-1 text-left"}>{display}</span>
+        {nights && <span className="text-[10px] text-gray-400 flex-shrink-0">{nights}일</span>}
+      </button>
+      {open && (
+        <div className="absolute z-[60] top-11 left-0 bg-white rounded-xl border border-gray-100 shadow-2xl p-3 w-64">
+          {/* Step indicator */}
+          <div className="flex items-center gap-1.5 mb-3">
+            <div className={`flex-1 text-center text-xs py-1 rounded-lg font-medium transition-colors ${step==="start" ? "bg-[#1E5F52] text-white" : "bg-gray-100 text-gray-500"}`}>
+              {startDate ? fmtDate(startDate) : "시작일"}
+            </div>
+            <span className="text-gray-300 text-xs">→</span>
+            <div className={`flex-1 text-center text-xs py-1 rounded-lg font-medium transition-colors ${step==="end" ? "bg-[#1E5F52] text-white" : "bg-gray-100 text-gray-500"}`}>
+              {step==="end" && hover ? fmtDate(previewEnd) : endDate ? fmtDate(endDate) : "종료일"}
+            </div>
+          </div>
+          {/* Month nav */}
+          <div className="flex items-center justify-between mb-2">
+            <button onClick={()=>setCal(c=>c.m===0?{y:c.y-1,m:11}:{y:c.y,m:c.m-1})} className="w-6 h-6 rounded-md hover:bg-gray-100 flex items-center justify-center text-gray-400 transition-colors">
+              <ChevronLeft size={12}/>
+            </button>
+            <span className="text-xs font-semibold text-gray-700">{y}. {String(m+1).padStart(2,"0")}</span>
+            <button onClick={()=>setCal(c=>c.m===11?{y:c.y+1,m:0}:{y:c.y,m:c.m+1})} className="w-6 h-6 rounded-md hover:bg-gray-100 flex items-center justify-center text-gray-400 transition-colors">
+              <ChevronRight size={12}/>
+            </button>
+          </div>
+          {/* Day names */}
+          <div className="grid grid-cols-7 mb-0.5">
+            {dayNames.map(d => <div key={d} className="text-center text-[9px] font-semibold py-0.5 text-gray-400">{d}</div>)}
+          </div>
+          {/* Cells */}
+          <div className="grid grid-cols-7">
+            {cells.map((d, i) => {
+              if (!d) return <div key={"e"+i}/>
+              const dateStr = ds(d)
+              const isS = dateStr === startDate
+              const isE = dateStr === previewEnd
+              const inR = startDate && previewEnd && dateStr > startDate && dateStr < previewEnd
+              return (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => handleDay(dateStr)}
+                  onMouseEnter={() => step==="end" && setHover(dateStr)}
+                  onMouseLeave={() => setHover(null)}
+                  className={`h-7 text-[11px] flex items-center justify-center relative transition-colors
+                    ${isS || isE ? "text-white font-bold" : inR ? "text-[#1E5F52] bg-[#EAF0EE]" : "text-gray-600 hover:bg-gray-100 rounded-md"}
+                    ${isS ? "rounded-l-full" : ""}
+                    ${isE ? "rounded-r-full" : ""}
+                  `}
+                >
+                  {(isS || isE) && <span className="absolute inset-0.5 rounded-full bg-[#1E5F52] -z-10"/>}
+                  {d}
+                </button>
+              )
+            })}
+          </div>
+          {startDate && endDate && (
+            <button type="button" onClick={()=>{onChange({start_date:"",end_date:""});setStep("start")}} className="mt-2 w-full text-[10px] text-gray-400 hover:text-red-400 transition-colors">
+              초기화
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Draggable Calendar ────────────────────────────────────────────
 function DraggableCalendar({ phases, projects, calDate, setCalDate, onUpdatePhase }) {
   const [dragging, setDragging] = useState(null)
@@ -687,15 +806,13 @@ export default function App() {
                   <ColorPicker value={phaseForm.color} onChange={c=>setPhaseForm(f=>({...f,color:c}))}/>
                   <Input placeholder="단계 이름" value={phaseForm.name} onChange={e=>setPhaseForm(f=>({...f,name:e.target.value}))} className="flex-1"/>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-xs text-gray-400 mb-1 block">시작일</label>
-                    <Input type="date" value={phaseForm.start_date} onChange={e=>setPhaseForm(f=>({...f,start_date:e.target.value}))} className="text-sm"/>
-                  </div>
-                  <div>
-                    <label className="text-xs text-gray-400 mb-1 block">종료일</label>
-                    <Input type="date" value={phaseForm.end_date} onChange={e=>setPhaseForm(f=>({...f,end_date:e.target.value}))} className="text-sm"/>
-                  </div>
+                <div>
+                  <label className="text-xs text-gray-400 mb-1 block">기간</label>
+                  <DateRangePicker
+                    startDate={phaseForm.start_date}
+                    endDate={phaseForm.end_date}
+                    onChange={({start_date, end_date}) => setPhaseForm(f=>({...f, start_date, end_date}))}
+                  />
                 </div>
                 <Button onClick={submitPhase} className="w-full bg-[#1E5F52] hover:bg-[#164A3F]">
                   {editPhaseId?"저장":"단계 추가"}
