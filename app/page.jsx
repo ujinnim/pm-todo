@@ -252,27 +252,33 @@ function TaskForm({ form, setForm, editId, onSubmit, onCancel, projects, ts }) {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs font-medium text-gray-500 mb-1.5 block">과제</label>
-              <select
-                value={form.project_id}
-                onChange={e => setForm(f => ({...f, project_id: e.target.value ? Number(e.target.value) : ""}))}
-                className="w-full h-9 rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1E5F52] focus:border-transparent"
-              >
-                <option value="">미지정</option>
-                {projects.filter(p=>!p.done).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-              </select>
+              <div className="relative">
+                <select
+                  value={form.project_id}
+                  onChange={e => setForm(f => ({...f, project_id: e.target.value ? Number(e.target.value) : ""}))}
+                  className="w-full h-9 rounded-lg border border-gray-200 bg-white pl-3 pr-8 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1E5F52] focus:border-transparent appearance-none"
+                >
+                  <option value="">미지정</option>
+                  {projects.filter(p=>!p.done).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                </select>
+                <ChevronRight size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 rotate-90 text-gray-400 pointer-events-none"/>
+              </div>
             </div>
             <div>
               <label className="text-xs font-medium text-gray-500 mb-1.5 block">일정</label>
-              <select
-                value={form.schedule}
-                onChange={e => setForm(f => ({...f, schedule: e.target.value, schedule_date: ""}))}
-                className="w-full h-9 rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1E5F52] focus:border-transparent"
-              >
-                <option value="today">오늘</option>
-                <option value="date">날짜 지정</option>
-                <option value="tomorrow">백로그</option>
-                <option value="none">미지정</option>
-              </select>
+              <div className="relative">
+                <select
+                  value={form.schedule}
+                  onChange={e => setForm(f => ({...f, schedule: e.target.value, schedule_date: ""}))}
+                  className="w-full h-9 rounded-lg border border-gray-200 bg-white pl-3 pr-8 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1E5F52] focus:border-transparent appearance-none"
+                >
+                  <option value="today">오늘</option>
+                  <option value="date">날짜 지정</option>
+                  <option value="tomorrow">백로그</option>
+                  <option value="none">미지정</option>
+                </select>
+                <ChevronRight size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 rotate-90 text-gray-400 pointer-events-none"/>
+              </div>
             </div>
           </div>
           {form.schedule === "date" && (
@@ -653,14 +659,17 @@ export default function App() {
         {/* Project selector */}
         <div className="mb-4">
           <label className="text-xs font-semibold text-gray-500 mb-1.5 block">과제 선택</label>
-          <select
-            value={selProj}
-            onChange={e => setSelProj(e.target.value)}
-            className="w-full h-9 rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1E5F52]"
-          >
-            <option value="">전체 보기</option>
-            {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-          </select>
+          <div className="relative">
+            <select
+              value={selProj}
+              onChange={e => setSelProj(e.target.value)}
+              className="w-full h-9 rounded-lg border border-gray-200 bg-white pl-3 pr-8 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1E5F52] appearance-none"
+            >
+              <option value="">전체 보기</option>
+              {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+            <ChevronRight size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 rotate-90 text-gray-400 pointer-events-none"/>
+          </div>
         </div>
 
         {/* Phase form */}
