@@ -11,7 +11,7 @@ import {
   Plus, Calendar, CheckCircle2, Circle, Pin, PinOff,
   Pencil, Trash2, ChevronLeft, ChevronRight, X,
   Inbox, Clock, Archive, LayoutGrid, FolderKanban,
-  Check, Loader2
+  Check, Loader2, NotebookPen
 } from "lucide-react"
 
 const COLORS = [
@@ -557,6 +557,71 @@ function ProjectManager({
   )
 }
 
+// ── Memo Panel ───────────────────────────────────────────────────
+function MemoPanel({ onClose }) {
+  const [text, setText] = useState(() => {
+    if (typeof window !== "undefined") return localStorage.getItem("pm-todo-memo") || ""
+    return ""
+  })
+  const [saved, setSaved] = useState(false)
+  const timerRef = useRef(null)
+
+  function handleChange(e) {
+    const val = e.target.value
+    setText(val)
+    setSaved(false)
+    clearTimeout(timerRef.current)
+    timerRef.current = setTimeout(() => {
+      localStorage.setItem("pm-todo-memo", val)
+      setSaved(true)
+      setTimeout(() => setSaved(false), 1500)
+    }, 600)
+  }
+
+  return (
+    <div className="flex flex-col h-full bg-white border-l border-gray-100">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 flex-shrink-0">
+        <div className="flex items-center gap-2">
+          <NotebookPen size={14} className="text-[#1E5F52]"/>
+          <span className="text-sm font-semibold text-gray-800">메모</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {saved && <span className="text-[10px] text-gray-400">저장됨</span>}
+          <button
+            onClick={onClose}
+            className="w-6 h-6 rounded-md hover:bg-gray-100 flex items-center justify-center text-gray-400 transition-colors"
+          >
+            <X size={13}/>
+          </button>
+        </div>
+      </div>
+      {/* Body */}
+      <textarea
+        value={text}
+        onChange={handleChange}
+        placeholder={"자유롭게 메모하세요\n\n• 아이디어\n• 회의 내용\n• 중요한 것들..."}
+        className="flex-1 w-full resize-none p-4 text-sm text-gray-700 leading-relaxed placeholder:text-gray-300 focus:outline-none bg-white"
+        style={{ fontFamily: "inherit" }}
+      />
+      {/* Footer */}
+      <div className="px-4 py-2 border-t border-gray-100 flex-shrink-0">
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] text-gray-300">{text.length}자</span>
+          {text.length > 0 && (
+            <button
+              onClick={() => { setText(""); localStorage.removeItem("pm-todo-memo") }}
+              className="text-[10px] text-gray-300 hover:text-red-400 transition-colors"
+            >
+              전체 삭제
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Main App ──────────────────────────────────────────────────────
 export default function App() {
   const [tasks, setTasks] = useState([])
@@ -579,6 +644,9 @@ export default function App() {
   const [editingProjName, setEditingProjName] = useState("")
   const [editingProjColor, setEditingProjColor] = useState("")
   const [editingProjOpenDate, setEditingProjOpenDate] = useState("")
+
+  // Memo panel
+  const [showMemo, setShowMemo] = useState(false)
 
   // Views & calendar
   const [view, setView] = useState("all")
@@ -919,6 +987,13 @@ export default function App() {
             <span className="text-sm font-bold text-gray-900 tracking-tight">PM Todo</span>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowMemo(v => !v)}
+              title="메모"
+              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${showMemo ? "bg-[#1E5F52] text-white" : "text-gray-400 hover:bg-gray-100"}`}
+            >
+              <NotebookPen size={14}/>
+            </button>
             <Button
               variant="outline"
               size="sm"
@@ -941,7 +1016,9 @@ export default function App() {
       </header>
 
       {/* ── Main Content ──────────────────────────────────────── */}
-      <main className="max-w-2xl mx-auto px-4 py-5">
+      <div className={`mx-auto px-4 py-5 transition-all duration-300 ${showMemo ? "max-w-5xl" : "max-w-2xl"}`}>
+      <div className={`flex gap-5 items-start ${showMemo ? "" : ""}`}>
+      <main className="flex-1 min-w-0">
 
         {/* Tab Bar */}
         <div className="flex items-center gap-2 mb-5">
@@ -981,6 +1058,15 @@ export default function App() {
         {/* Content */}
         {view==="schedule" ? renderScheduleTab() : renderGroups(getFiltered())}
       </main>
+
+      {/* ── Memo Panel ────────────────────────────────────────── */}
+      {showMemo && (
+        <aside className="w-72 flex-shrink-0 sticky top-20 rounded-2xl overflow-hidden border border-gray-100 shadow-sm" style={{height: "calc(100vh - 96px)"}}>
+          <MemoPanel onClose={() => setShowMemo(false)}/>
+        </aside>
+      )}
+      </div>
+      </div>
 
       {/* ── Modals ────────────────────────────────────────────── */}
       {showForm && (
