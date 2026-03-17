@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 @theme {
-  --color-teal-50: #f0fdfa;
-  --color-teal-100: #ccfbf1;
-  --color-teal-200: #99f6e4;
-  --color-teal-500: #14b8a6;
-  --color-teal-600: #0d9488;
-  --color-teal-700: #0f766e;
+  --color-forest-50: #EAF0EE;
+  --color-forest-100: #C2D9D4;
+  --color-forest-200: #8DBDB5;
+  --color-forest-500: #2D8069;
+  --color-forest-600: #1E5F52;
+  --color-forest-700: #164A3F;
 }
 
 * {
@@ -15,7 +15,7 @@
 
 body {
   margin: 0;
-  background: #f8fafc;
+  background: #F5F7F6;
   -webkit-font-smoothing: antialiased;
 }
 
