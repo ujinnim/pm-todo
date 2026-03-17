@@ -319,7 +319,7 @@ function DraggableCalendar({ phases, projects, calDate, setCalDate, onUpdatePhas
                 {cell.d}
               </div>
               <div className="flex flex-col gap-px">
-                {dph.slice(0,2).map(ph => {
+                {dph.slice(0,3).map(ph => {
                   const p = prev(ph)
                   return (
                     <div key={ph.id} draggable={!isOtherMonth}
@@ -335,6 +335,11 @@ function DraggableCalendar({ phases, projects, calDate, setCalDate, onUpdatePhas
                     </div>
                   )
                 })}
+                {dph.length > 3 && (
+                  <div className="text-[8px] text-gray-400 font-medium px-1 leading-tight">
+                    +{dph.length - 3}
+                  </div>
+                )}
               </div>
             </div>
           )
