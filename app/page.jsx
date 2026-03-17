@@ -171,8 +171,8 @@ function DraggableCalendar({ phases, projects, calDate, setCalDate, onUpdatePhas
             <div key={d}
               onDragOver={e => { e.preventDefault(); setHoverDay(dateStr) }}
               onDrop={e => { e.preventDefault(); if(!dragging)return; const delta=diffDays(dragging.startDayStr,dateStr); if(delta!==0)onUpdatePhase(dragging.phaseId,{start_date:addDays(dragging.origStart,delta),end_date:addDays(dragging.origEnd,delta)}); setDragging(null); setHoverDay(null) }}
-              className={`min-h-14 p-1 bg-white ${isT?"ring-2 ring-inset ring-teal-400":""}`}>
-              <div className={`text-center text-xs mb-0.5 w-6 h-6 flex items-center justify-center mx-auto rounded-full ${isT?"bg-teal-500 text-white font-bold":"text-gray-500"}`}>{d}</div>
+              className={`min-h-14 p-1 bg-white ${isT?"ring-2 ring-inset ring-[#88BFB0]":""}`}>
+              <div className={`text-center text-xs mb-0.5 w-6 h-6 flex items-center justify-center mx-auto rounded-full ${isT?"bg-[#88BFB0] text-white font-bold":"text-gray-500"}`}>{d}</div>
               <div className="flex flex-col gap-px">
                 {dph.slice(0,2).map(ph => {
                   const p = prev(ph)
@@ -255,7 +255,7 @@ function TaskForm({ form, setForm, editId, onSubmit, onCancel, projects, ts }) {
               <select
                 value={form.project_id}
                 onChange={e => setForm(f => ({...f, project_id: e.target.value ? Number(e.target.value) : ""}))}
-                className="w-full h-9 rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                className="w-full h-9 rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#88BFB0] focus:border-transparent"
               >
                 <option value="">미지정</option>
                 {projects.filter(p=>!p.done).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -266,7 +266,7 @@ function TaskForm({ form, setForm, editId, onSubmit, onCancel, projects, ts }) {
               <select
                 value={form.schedule}
                 onChange={e => setForm(f => ({...f, schedule: e.target.value, schedule_date: ""}))}
-                className="w-full h-9 rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                className="w-full h-9 rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#88BFB0] focus:border-transparent"
               >
                 <option value="today">오늘</option>
                 <option value="date">날짜 지정</option>
@@ -289,7 +289,7 @@ function TaskForm({ form, setForm, editId, onSubmit, onCancel, projects, ts }) {
         {/* Footer */}
         <div className="flex gap-2 px-5 pb-5">
           <Button onClick={onCancel} variant="outline" className="flex-1">취소</Button>
-          <Button onClick={onSubmit} className="flex-1 bg-teal-600 hover:bg-teal-700">{editId ? "저장" : "추가"}</Button>
+          <Button onClick={onSubmit} className="flex-1 bg-[#88BFB0] hover:bg-[#6AA99A]">{editId ? "저장" : "추가"}</Button>
         </div>
       </div>
     </div>
@@ -307,11 +307,11 @@ function ProjectManager({
   const completed = projects.filter(p => p.done)
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"/>
+      <div className="absolute inset-0 bg-black/40"/>
       <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden max-h-[85vh] flex flex-col" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-gray-100 flex-shrink-0">
           <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-            <FolderKanban size={16} className="text-teal-600"/>
+            <FolderKanban size={16} className="text-[#6AA99A]"/>
             과제 관리
           </h2>
           <button onClick={onClose} className="w-7 h-7 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400 transition-colors">
@@ -328,11 +328,11 @@ function ProjectManager({
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2">
                     <ColorPicker value={editingProjColor} onChange={setEditingProjColor}/>
-                    <input value={editingProjName} onChange={e=>setEditingProjName(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();onSaveEditProj(p.id)}else if(e.key==="Escape")setEditingProjId(null)}} autoFocus className="flex-1 text-sm font-medium bg-white rounded-lg border border-gray-200 px-3 h-8 focus:outline-none focus:ring-2 focus:ring-teal-500"/>
+                    <input value={editingProjName} onChange={e=>setEditingProjName(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();onSaveEditProj(p.id)}else if(e.key==="Escape")setEditingProjId(null)}} autoFocus className="flex-1 text-sm font-medium bg-white rounded-lg border border-gray-200 px-3 h-8 focus:outline-none focus:ring-2 focus:ring-[#88BFB0]"/>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-gray-400 w-10">오픈일</span>
-                    <input type="date" value={editingProjOpenDate} onChange={e=>setEditingProjOpenDate(e.target.value)} className="flex-1 text-xs bg-white rounded-lg border border-gray-200 px-2 h-7 focus:outline-none focus:ring-2 focus:ring-teal-500"/>
+                    <input type="date" value={editingProjOpenDate} onChange={e=>setEditingProjOpenDate(e.target.value)} className="flex-1 text-xs bg-white rounded-lg border border-gray-200 px-2 h-7 focus:outline-none focus:ring-2 focus:ring-[#88BFB0]"/>
                   </div>
                   <div className="flex gap-2">
                     <Button size="sm" onClick={()=>onSaveEditProj(p.id)} className="flex-1 text-xs h-7">저장</Button>
@@ -347,7 +347,7 @@ function ProjectManager({
                     {p.open_date && <div className="text-xs text-gray-400 mt-0.5">{fmtDate(p.open_date)} 오픈</div>}
                   </div>
                   <div className="flex gap-1 flex-shrink-0">
-                    <button onClick={()=>onToggleProjDone(p.id)} className="px-2 py-1 text-xs text-gray-500 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors">완료</button>
+                    <button onClick={()=>onToggleProjDone(p.id)} className="px-2 py-1 text-xs text-gray-500 hover:text-[#6AA99A] hover:bg-[#f0f8f6] rounded-md transition-colors">완료</button>
                     <button onClick={()=>{setEditingProjId(p.id);setEditingProjName(p.name);setEditingProjColor(p.color);setEditingProjOpenDate(p.open_date||"")}} className="px-2 py-1 text-xs text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors">수정</button>
                     <button onClick={()=>onDeleteProject(p.id)} className="px-2 py-1 text-xs text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors">삭제</button>
                   </div>
@@ -366,7 +366,7 @@ function ProjectManager({
                       <div className="text-sm text-gray-600 line-through truncate">{p.name}</div>
                     </div>
                     <div className="flex gap-1">
-                      <button onClick={()=>onToggleProjDone(p.id)} className="px-2 py-1 text-xs text-gray-500 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors">되돌리기</button>
+                      <button onClick={()=>onToggleProjDone(p.id)} className="px-2 py-1 text-xs text-gray-500 hover:text-[#6AA99A] hover:bg-[#f0f8f6] rounded-md transition-colors">되돌리기</button>
                       <button onClick={()=>onDeleteProject(p.id)} className="px-2 py-1 text-xs text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors">삭제</button>
                     </div>
                   </div>
@@ -375,17 +375,17 @@ function ProjectManager({
             </>
           )}
           {showNewProjForm && (
-            <div className="rounded-xl border-2 border-teal-100 bg-teal-50 p-3 flex flex-col gap-2">
+            <div className="rounded-xl border-2 border-[#d4eae5] bg-[#f0f8f6] p-3 flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <ColorPicker value={newProjColor} onChange={setNewProjColor}/>
-                <input placeholder="새 과제 이름" value={newProjName} onChange={e=>setNewProjName(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();e.stopPropagation();onAddProject()}}} autoFocus className="flex-1 text-sm font-medium bg-white rounded-lg border border-gray-200 px-3 h-8 focus:outline-none focus:ring-2 focus:ring-teal-500"/>
+                <input placeholder="새 과제 이름" value={newProjName} onChange={e=>setNewProjName(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();e.stopPropagation();onAddProject()}}} autoFocus className="flex-1 text-sm font-medium bg-white rounded-lg border border-gray-200 px-3 h-8 focus:outline-none focus:ring-2 focus:ring-[#88BFB0]"/>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-gray-400 w-10">오픈일</span>
-                <input type="date" value={newProjOpenDate} onChange={e=>setNewProjOpenDate(e.target.value)} className="flex-1 text-xs bg-white rounded-lg border border-gray-200 px-2 h-7 focus:outline-none focus:ring-2 focus:ring-teal-500"/>
+                <input type="date" value={newProjOpenDate} onChange={e=>setNewProjOpenDate(e.target.value)} className="flex-1 text-xs bg-white rounded-lg border border-gray-200 px-2 h-7 focus:outline-none focus:ring-2 focus:ring-[#88BFB0]"/>
               </div>
               <div className="flex gap-2">
-                <Button size="sm" onClick={onAddProject} className="flex-1 text-xs h-7 bg-teal-600 hover:bg-teal-700">추가</Button>
+                <Button size="sm" onClick={onAddProject} className="flex-1 text-xs h-7 bg-[#88BFB0] hover:bg-[#6AA99A]">추가</Button>
                 <Button size="sm" variant="ghost" onClick={()=>setShowNewProjForm(false)} className="flex-1 text-xs h-7">취소</Button>
               </div>
             </div>
@@ -579,7 +579,7 @@ export default function App() {
       <div className={`flex items-start gap-3 px-4 py-3 group hover:bg-gray-50 transition-colors ${!isLast?"border-b border-gray-100":""}`}>
         <button
           onClick={() => toggleDone(t.id)}
-          className={`mt-0.5 flex-shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${t.done?"bg-teal-500 border-teal-500":"border-gray-300 hover:border-teal-400"}`}
+          className={`mt-0.5 flex-shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${t.done?"bg-[#88BFB0] border-[#88BFB0]":"border-gray-300 hover:border-[#88BFB0]"}`}
         >
           {t.done && <Check size={10} className="text-white" strokeWidth={3}/>}
         </button>
@@ -603,7 +603,7 @@ export default function App() {
             <button
               onClick={() => moveTask(t)}
               title={pinned?"백로그로":"오늘로"}
-              className={`w-7 h-7 rounded-md flex items-center justify-center transition-colors ${pinned?"text-teal-500 hover:bg-teal-50":"text-gray-300 hover:bg-gray-100 hover:text-gray-500"}`}
+              className={`w-7 h-7 rounded-md flex items-center justify-center transition-colors ${pinned?"text-[#88BFB0] hover:bg-[#f0f8f6]":"text-gray-300 hover:bg-gray-100 hover:text-gray-500"}`}
             >
               {pinned ? <Pin size={13}/> : <PinOff size={13}/>}
             </button>
@@ -656,7 +656,7 @@ export default function App() {
           <select
             value={selProj}
             onChange={e => setSelProj(e.target.value)}
-            className="w-full h-9 rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
+            className="w-full h-9 rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#88BFB0]"
           >
             <option value="">전체 보기</option>
             {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -668,7 +668,7 @@ export default function App() {
           <div className="mb-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-semibold text-gray-500">단계</span>
-              <button onClick={() => setShowPhaseForm(v=>!v)} className="text-xs text-teal-600 hover:text-teal-700 font-medium">
+              <button onClick={() => setShowPhaseForm(v=>!v)} className="text-xs text-[#6AA99A] hover:text-[#5a9589] font-medium">
                 {showPhaseForm?"접기":"+ 추가"}
               </button>
             </div>
@@ -688,7 +688,7 @@ export default function App() {
                     <Input type="date" value={phaseForm.end_date} onChange={e=>setPhaseForm(f=>({...f,end_date:e.target.value}))} className="text-sm"/>
                   </div>
                 </div>
-                <Button onClick={submitPhase} className="w-full bg-teal-600 hover:bg-teal-700">
+                <Button onClick={submitPhase} className="w-full bg-[#88BFB0] hover:bg-[#6AA99A]">
                   {editPhaseId?"저장":"단계 추가"}
                 </Button>
               </Card>
@@ -756,7 +756,7 @@ export default function App() {
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-lg bg-teal-500 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg bg-[#88BFB0] flex items-center justify-center">
               <Check size={14} className="text-white" strokeWidth={2.5}/>
             </div>
             <span className="text-sm font-bold text-gray-900 tracking-tight">PM Todo</span>
@@ -774,7 +774,7 @@ export default function App() {
             <Button
               size="sm"
               onClick={() => { setShowForm(true); setEditId(null) }}
-              className="gap-1.5 text-xs bg-teal-600 hover:bg-teal-700"
+              className="gap-1.5 text-xs bg-[#88BFB0] hover:bg-[#6AA99A]"
             >
               <Plus size={13}/>
               추가
@@ -802,7 +802,7 @@ export default function App() {
                 {tab.icon}
                 {tab.label}
                 {tab.count > 0 && (
-                  <span className={`text-[10px] font-semibold rounded-full px-1.5 py-px ${view===tab.key?"bg-teal-100 text-teal-700":"bg-gray-200 text-gray-500"}`}>
+                  <span className={`text-[10px] font-semibold rounded-full px-1.5 py-px ${view===tab.key?"bg-[#d4eae5] text-[#5a9589]":"bg-gray-200 text-gray-500"}`}>
                     {tab.count}
                   </span>
                 )}
@@ -813,7 +813,7 @@ export default function App() {
             onClick={() => setView(v => v==="schedule"?"all":"schedule")}
             className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all flex-shrink-0 ${
               view==="schedule"
-                ? "bg-teal-500 text-white shadow-md shadow-teal-200"
+                ? "bg-[#88BFB0] text-white shadow-md shadow-[#d4eae5]"
                 : "bg-gray-100 text-gray-500 hover:bg-gray-200"
             }`}
           >
