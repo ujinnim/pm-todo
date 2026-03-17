@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+  --color-teal-50: #f0fdfa;
+  --color-teal-100: #ccfbf1;
+  --color-teal-200: #99f6e4;
+  --color-teal-500: #14b8a6;
+  --color-teal-600: #0d9488;
+  --color-teal-700: #0f766e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f8fafc;
+  -webkit-font-smoothing: antialiased;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0.5;
+  cursor: pointer;
+}
