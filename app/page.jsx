@@ -249,12 +249,35 @@ function DraggableCalendar({ phases, projects, calDate, setCalDate, onUpdatePhas
   const { y, m } = calDate
   const firstDay = new Date(y, m, 1).getDay()
   const daysInMonth = new Date(y, m+1, 0).getDate()
+  const prevMonthDays = new Date(y, m, 0).getDate()
   const monthStr = y+"-"+String(m+1).padStart(2,"0")
   const ts = today()
+
+  // 전달 trailing + 이번달 + 다음달 leading으로 셀 구성
   const cells = []
-  for (let i=0; i<firstDay; i++) cells.push(null)
-  for (let d=1; d<=daysInMonth; d++) cells.push(d)
-  const vis = phases.filter(ph => ph.start_date && ph.end_date && ph.start_date.slice(0,7)<=monthStr && ph.end_date.slice(0,7)>=monthStr)
+  for (let i = firstDay - 1; i >= 0; i--) cells.push({ d: prevMonthDays - i, type: "prev" })
+  for (let d = 1; d <= daysInMonth; d++) cells.push({ d, type: "cur" })
+  const remaining = (7 - (cells.length % 7)) % 7
+  for (let d = 1; d <= remaining; d++) cells.push({ d, type: "next" })
+
+  function dsCell(cell) {
+    if (cell.type === "prev") {
+      const pm = m === 0 ? 11 : m - 1
+      const py = m === 0 ? y - 1 : y
+      return py+"-"+String(pm+1).padStart(2,"0")+"-"+String(cell.d).padStart(2,"0")
+    }
+    if (cell.type === "next") {
+      const nm = m === 11 ? 0 : m + 1
+      const ny = m === 11 ? y + 1 : y
+      return ny+"-"+String(nm+1).padStart(2,"0")+"-"+String(cell.d).padStart(2,"0")
+    }
+    return y+"-"+String(m+1).padStart(2,"0")+"-"+String(cell.d).padStart(2,"0")
+  }
+
+  // vis는 인접 달 포함하도록 범위 확장
+  const visStart = cells[0] ? dsCell(cells[0]) : monthStr+"-01"
+  const visEnd = cells[cells.length-1] ? dsCell(cells[cells.length-1]) : monthStr+"-31"
+  const vis = phases.filter(ph => ph.start_date && ph.end_date && ph.start_date<=visEnd && ph.end_date>=visStart)
   const dayNames = ["일","월","화","수","목","금","토"]
 
   function ds(d) { return y+"-"+String(m+1).padStart(2,"0")+"-"+String(d).padStart(2,"0") }
@@ -281,28 +304,31 @@ function DraggableCalendar({ phases, projects, calDate, setCalDate, onUpdatePhas
         ))}
       </div>
       <div className="grid grid-cols-7 gap-px bg-gray-100 rounded-lg overflow-hidden">
-        {cells.map((d, i) => {
-          if (!d) return <div key={"e"+i} className="bg-white"/>
-          const dateStr = ds(d)
+        {cells.map((cell, i) => {
+          const isOtherMonth = cell.type !== "cur"
+          const dateStr = dsCell(cell)
           const isT = dateStr === ts
           const dph = vis.filter(ph => { const p=prev(ph); return p.start<=dateStr&&p.end>=dateStr })
           return (
-            <div key={d}
-              onDragOver={e => { e.preventDefault(); setHoverDay(dateStr) }}
-              onDrop={e => { e.preventDefault(); if(!dragging)return; const delta=diffDays(dragging.startDayStr,dateStr); if(delta!==0)onUpdatePhase(dragging.phaseId,{start_date:addDays(dragging.origStart,delta),end_date:addDays(dragging.origEnd,delta)}); setDragging(null); setHoverDay(null) }}
-              className={`min-h-14 p-1 bg-white ${isT?"ring-2 ring-inset ring-[#1E5F52]":""}`}>
-              <div className={`text-center text-xs mb-0.5 w-6 h-6 flex items-center justify-center mx-auto rounded-full ${isT?"bg-[#1E5F52] text-white font-bold":"text-gray-500"}`}>{d}</div>
+            <div key={dateStr+i}
+              onDragOver={e => { if(isOtherMonth)return; e.preventDefault(); setHoverDay(dateStr) }}
+              onDrop={e => { e.preventDefault(); if(!dragging||isOtherMonth)return; const delta=diffDays(dragging.startDayStr,dateStr); if(delta!==0)onUpdatePhase(dragging.phaseId,{start_date:addDays(dragging.origStart,delta),end_date:addDays(dragging.origEnd,delta)}); setDragging(null); setHoverDay(null) }}
+              className={`min-h-14 p-1 ${isOtherMonth?"bg-gray-50/60":"bg-white"} ${isT?"ring-2 ring-inset ring-[#1E5F52]":""}`}>
+              <div className={`text-center text-xs mb-0.5 w-6 h-6 flex items-center justify-center mx-auto rounded-full
+                ${isT?"bg-[#1E5F52] text-white font-bold":isOtherMonth?"text-gray-300":"text-gray-500"}`}>
+                {cell.d}
+              </div>
               <div className="flex flex-col gap-px">
                 {dph.slice(0,2).map(ph => {
                   const p = prev(ph)
                   return (
-                    <div key={ph.id} draggable
-                      onDragStart={e => { e.stopPropagation(); setDragging({phaseId:ph.id,startDayStr:dateStr,origStart:ph.start_date,origEnd:ph.end_date}); e.dataTransfer.effectAllowed="move" }}
+                    <div key={ph.id} draggable={!isOtherMonth}
+                      onDragStart={e => { if(isOtherMonth)return; e.stopPropagation(); setDragging({phaseId:ph.id,startDayStr:dateStr,origStart:ph.start_date,origEnd:ph.end_date}); e.dataTransfer.effectAllowed="move" }}
                       onDragEnd={() => { setDragging(null); setHoverDay(null) }}
                       className="text-white text-[9px] font-medium px-1 py-px overflow-hidden whitespace-nowrap text-ellipsis cursor-grab select-none"
                       style={{
                         background: ph.color,
-                        opacity: dragging&&dragging.phaseId===ph.id ? 0.4 : 1,
+                        opacity: isOtherMonth ? 0.3 : dragging&&dragging.phaseId===ph.id ? 0.4 : 1,
                         borderRadius: p.start===dateStr&&p.end===dateStr?"3px":p.start===dateStr?"3px 0 0 3px":p.end===dateStr?"0 3px 3px 0":"0"
                       }}>
                       {p.start===dateStr ? ph.name : "\u00A0"}
