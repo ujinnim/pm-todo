@@ -569,7 +569,7 @@ export default function App() {
                 <div style={{display:"flex",alignItems:"center",gap:12,padding:"11px 16px",minHeight:44}}>
                   <ColorPicker value={newProjColor} onChange={setNewProjColor}/>
                   <div style={{flex:1,display:"flex",flexDirection:"column",gap:4}}>
-                    <input placeholder="새 과제 이름" value={newProjName} onChange={e=>setNewProjName(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();addProject();}}} autoFocus style={{fontSize:15,border:"none",outline:"none",background:"transparent",fontFamily:font}}/>
+                    <input placeholder="새 과제 이름" value={newProjName} onChange={e=>setNewProjName(e.target.value)}     onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();e.stopPropagation();addProject();}}}  autoFocus style={{fontSize:15,border:"none",outline:"none",background:"transparent",fontFamily:font}}/>
                     <div style={{display:"flex",alignItems:"center",gap:6}}>
                       <span style={{fontSize:12,color:tk.gray1}}>{"오픈일"}</span>
                       <input type="date" value={newProjOpenDate} onChange={e=>setNewProjOpenDate(e.target.value)} style={{...sel,fontSize:12}}/>
