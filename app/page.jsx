@@ -416,18 +416,29 @@ function TaskForm({ form, setForm, editId, onSubmit, onCancel, projects, ts }) {
             </div>
             <div>
               <label className="text-xs font-medium text-gray-500 mb-1.5 block">일정</label>
-              <div className="relative">
-                <select
-                  value={form.schedule}
-                  onChange={e => setForm(f => ({...f, schedule: e.target.value, schedule_date: ""}))}
-                  className="w-full h-9 rounded-lg border border-gray-200 bg-white pl-3 pr-8 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1E5F52] focus:border-transparent appearance-none"
-                >
-                  <option value="today">오늘</option>
-                  <option value="date">날짜 지정</option>
-                  <option value="tomorrow">백로그</option>
-                  <option value="none">미지정</option>
-                </select>
-                <ChevronRight size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 rotate-90 text-gray-400 pointer-events-none"/>
+              <div className="flex items-center gap-1.5">
+                <div className="relative flex-1">
+                  <select
+                    value={form.schedule}
+                    onChange={e => setForm(f => ({...f, schedule: e.target.value, schedule_date: ""}))}
+                    className="w-full h-9 rounded-lg border border-gray-200 bg-white pl-3 pr-8 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1E5F52] focus:border-transparent appearance-none"
+                  >
+                    <option value="today">오늘</option>
+                    <option value="date">날짜 지정</option>
+                    <option value="tomorrow">백로그</option>
+                    <option value="none">미지정</option>
+                  </select>
+                  <ChevronRight size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 rotate-90 text-gray-400 pointer-events-none"/>
+                </div>
+                {form.schedule !== "none" && (
+                  <button
+                    type="button"
+                    onClick={() => setForm(f => ({...f, schedule: "none", schedule_date: ""}))}
+                    className="w-9 h-9 flex-shrink-0 rounded-lg border border-gray-200 flex items-center justify-center text-gray-300 hover:text-red-400 hover:border-red-200 hover:bg-red-50 transition-colors"
+                  >
+                    <X size={14}/>
+                  </button>
+                )}
               </div>
             </div>
           </div>
