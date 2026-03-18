@@ -471,8 +471,7 @@ function ProjectManager({
   editingProjId, setEditingProjId, editingProjName, setEditingProjName, editingProjColor, setEditingProjColor, editingProjOpenDate, setEditingProjOpenDate,
   onReorderProjects,
 }) {
-  const [dragProjId, setDragProjId] = useState(null)
-  const [dragOverProjId, setDragOverProjId] = useState(null)
+  const dragProjRef = useRef(null)
   const active = projects.filter(p => !p.done)
   const completed = projects.filter(p => p.done)
   return (
@@ -495,11 +494,29 @@ function ProjectManager({
           {active.map(p => (
             <div key={p.id}
               draggable={editingProjId !== p.id}
-              onDragStart={e => { if(editingProjId===p.id)return; setDragProjId(p.id); e.dataTransfer.effectAllowed="move" }}
-              onDragOver={e => { e.preventDefault(); if(dragProjId)setDragOverProjId(p.id) }}
-              onDrop={e => { e.preventDefault(); if(dragProjId&&dragProjId!==p.id)onReorderProjects(dragProjId,p.id); setDragProjId(null); setDragOverProjId(null) }}
-              onDragEnd={() => { setDragProjId(null); setDragOverProjId(null) }}
-              className={`rounded-xl border border-gray-100 bg-gray-50 p-3 transition-all ${dragProjId===p.id?"opacity-40":""}${dragOverProjId===p.id&&dragProjId!==p.id?" ring-2 ring-[#1E5F52]/25 bg-[#EAF0EE]/40":""}`}
+              onDragStart={e => {
+                if(editingProjId===p.id)return
+                dragProjRef.current = p.id
+                e.dataTransfer.effectAllowed="move"
+                e.currentTarget.style.opacity="0.4"
+              }}
+              onDragOver={e => {
+                e.preventDefault()
+                if(dragProjRef.current && dragProjRef.current!==p.id) e.currentTarget.style.outline="2px solid rgb(30 95 82 / 0.25)"
+              }}
+              onDragLeave={e => { e.currentTarget.style.outline="" }}
+              onDrop={e => {
+                e.preventDefault()
+                e.currentTarget.style.outline=""
+                const fromId = dragProjRef.current
+                if(fromId && fromId!==p.id) onReorderProjects(fromId, p.id)
+                dragProjRef.current = null
+              }}
+              onDragEnd={e => {
+                e.currentTarget.style.opacity=""
+                dragProjRef.current = null
+              }}
+              className="rounded-xl border border-gray-100 bg-gray-50 p-3"
             >
               {editingProjId === p.id ? (
                 <div className="flex flex-col gap-2">
@@ -744,8 +761,7 @@ export default function App() {
     }
     return []
   })
-  const [dragTaskId, setDragTaskId] = useState(null)
-  const [dragOverTaskId, setDragOverTaskId] = useState(null)
+  const dragTaskRef = useRef(null)
 
   // Views & calendar
   const [view, setView] = useState("all")
@@ -927,17 +943,32 @@ export default function App() {
     const eff = getEff(t, ts)
     const hasMemo = t.memo && t.memo.trim()
     const pinned = eff === "today"
-    const isDragging = dragTaskId === t.id
-    const isDragOver = dragOverTaskId === t.id && dragTaskId !== t.id
 
     return (
       <div
         draggable
-        onDragStart={e => { setDragTaskId(t.id); e.dataTransfer.effectAllowed = "move" }}
-        onDragOver={e => { e.preventDefault(); setDragOverTaskId(t.id) }}
-        onDrop={e => { e.preventDefault(); if (dragTaskId && dragTaskId !== t.id) reorderTasks(dragTaskId, t.id); setDragTaskId(null); setDragOverTaskId(null) }}
-        onDragEnd={() => { setDragTaskId(null); setDragOverTaskId(null) }}
-        className={`flex items-start gap-2 px-4 py-3 group hover:bg-gray-50/70 transition-colors ${!isLast?"border-b border-gray-50":""}${isDragging?" opacity-40":""}${isDragOver?" bg-[#EAF0EE]/60":""}`}
+        onDragStart={e => {
+          dragTaskRef.current = t.id
+          e.dataTransfer.effectAllowed = "move"
+          e.currentTarget.style.opacity = "0.4"
+        }}
+        onDragOver={e => {
+          e.preventDefault()
+          if (dragTaskRef.current !== t.id) e.currentTarget.style.background = "rgb(234 240 238 / 0.6)"
+        }}
+        onDragLeave={e => { e.currentTarget.style.background = "" }}
+        onDrop={e => {
+          e.preventDefault()
+          e.currentTarget.style.background = ""
+          const fromId = dragTaskRef.current
+          if (fromId && fromId !== t.id) reorderTasks(fromId, t.id)
+          dragTaskRef.current = null
+        }}
+        onDragEnd={e => {
+          e.currentTarget.style.opacity = ""
+          dragTaskRef.current = null
+        }}
+        className={`flex items-start gap-2 px-4 py-3 group hover:bg-gray-50/70 transition-colors ${!isLast?"border-b border-gray-50":""}`}
       >
         <div className="mt-1 flex-shrink-0 text-gray-200 group-hover:text-gray-300 transition-colors cursor-grab">
           <GripVertical size={14}/>
