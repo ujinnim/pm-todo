@@ -385,7 +385,7 @@ function TaskForm({ form, setForm, editId, onSubmit, onCancel, projects, ts }) {
               placeholder="할 일을 입력하세요"
               value={form.title}
               onChange={e => setForm(f => ({...f, title: e.target.value}))}
-              onKeyDown={e => { if(e.key==="Enter") onSubmit() }}
+              onKeyDown={e => { if(e.key==="Enter") { e.preventDefault(); onSubmit() } }}
               autoFocus
               className="text-base font-medium h-11"
             />
