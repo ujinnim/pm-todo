@@ -1066,7 +1066,7 @@ export default function App() {
       {/* ── Floating Memo Panel ───────────────────────────────── */}
       {showMemo && (
         <div
-          className="fixed bottom-6 right-6 z-40 rounded-2xl overflow-hidden shadow-2xl"
+          className="fixed top-20 right-6 z-40 rounded-2xl overflow-hidden shadow-2xl"
           style={{width: "320px", height: "420px", boxShadow: "0 8px 40px rgba(0,0,0,0.14)"}}
         >
           <MemoPanel onClose={() => setShowMemo(false)}/>
