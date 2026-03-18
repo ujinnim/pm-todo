@@ -1009,9 +1009,9 @@ export default function App() {
       </header>
 
       {/* ── Main Content ──────────────────────────────────────── */}
-      <div className="mx-auto px-4 py-5 max-w-5xl">
-      <div className={`flex gap-5 items-start ${!showMemo && "justify-center"}`}>
-      <main className="w-full max-w-2xl flex-shrink-0 min-w-0">
+      <div className="mx-auto px-4 py-5 max-w-2xl">
+      <div className="relative">
+      <main className="min-w-0">
 
         {/* Tab Bar */}
         <div className="flex items-center gap-2 mb-5">
@@ -1065,7 +1065,7 @@ export default function App() {
 
       {/* ── Memo Panel ────────────────────────────────────────── */}
       {showMemo && (
-        <aside className="w-72 flex-shrink-0 sticky top-20 rounded-2xl overflow-hidden shadow-sm border border-gray-100" style={{height: "calc(100vh - 96px)"}}>
+        <aside className="rounded-2xl overflow-hidden shadow-sm border border-gray-100" style={{position: "fixed", left: "calc(50% + 356px)", top: "80px", width: "288px", height: "calc(100vh - 96px)"}}>
           <MemoPanel onClose={() => setShowMemo(false)}/>
         </aside>
       )}
