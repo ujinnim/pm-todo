@@ -1009,7 +1009,7 @@ export default function App() {
       </header>
 
       {/* ── Main Content ──────────────────────────────────────── */}
-      <div className={`mx-auto px-4 py-5 transition-all duration-300 ${showMemo ? "max-w-5xl" : "max-w-2xl"}`}>
+      <div className={`mx-auto px-4 py-5 ${showMemo ? "max-w-5xl" : "max-w-2xl"}`}>
       <div className="flex gap-5 items-start">
       <main className="flex-1 min-w-0">
 
