@@ -987,13 +987,6 @@ export default function App() {
             <span className="text-sm font-bold text-gray-900 tracking-tight">PM Todo</span>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowMemo(v => !v)}
-              title="메모"
-              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${showMemo ? "bg-[#1E5F52] text-white" : "text-gray-400 hover:bg-gray-100"}`}
-            >
-              <NotebookPen size={14}/>
-            </button>
             <Button
               variant="outline"
               size="sm"
@@ -1051,6 +1044,17 @@ export default function App() {
             }`}
           >
             <Calendar size={15}/>
+          </button>
+          <button
+            onClick={() => setShowMemo(v => !v)}
+            title="메모"
+            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all flex-shrink-0 ${
+              showMemo
+                ? "bg-[#1E5F52] text-white shadow-md shadow-[#C2D9D4]"
+                : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+            }`}
+          >
+            <NotebookPen size={15}/>
           </button>
         </div>
 
