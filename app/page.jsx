@@ -1014,21 +1014,21 @@ export default function App() {
 
         {/* Tab Bar */}
         <div className="flex items-center gap-2 mb-5">
-          <div className="flex flex-1 bg-gray-100 rounded-xl p-1 gap-1">
+          <div className="flex flex-1 bg-white rounded-xl p-1 gap-1 border border-gray-200 shadow-sm">
             {tabs.map(tab => (
               <button
                 key={tab.key}
                 onClick={() => setView(tab.key)}
                 className={`flex-1 flex items-center justify-center gap-1.5 h-8 rounded-lg text-xs font-medium transition-all ${
                   view===tab.key
-                    ? "bg-white text-gray-900 shadow-sm"
-                    : "text-gray-500 hover:text-gray-700"
+                    ? "bg-[#1E5F52] text-white shadow-sm"
+                    : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"
                 }`}
               >
                 {tab.icon}
                 {tab.label}
                 {tab.count > 0 && (
-                  <span className={`text-[10px] font-semibold rounded-full px-1.5 py-px ${view===tab.key?"bg-[#C2D9D4] text-[#1E5F52]":"bg-gray-200 text-gray-500"}`}>
+                  <span className={`text-[10px] font-semibold rounded-full px-1.5 py-px ${view===tab.key?"bg-white/20 text-white":"bg-gray-100 text-gray-400"}`}>
                     {tab.count}
                   </span>
                 )}
