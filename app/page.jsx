@@ -582,7 +582,7 @@ function TodayPanel({ phases, projects, ts, onClose }) {
             <X size={12}/>
           </button>
         </div>
-        <div className="mt-3 h-px bg-gradient-to-r from-[#1E5F52]/20 via-[#1E5F52]/10 to-transparent"/>
+        <div className="mt-3 h-px bg-gray-100"/>
       </div>
       {/* Content */}
       <div className="px-4 pb-4">
