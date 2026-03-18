@@ -1009,8 +1009,9 @@ export default function App() {
       </header>
 
       {/* ── Main Content ──────────────────────────────────────── */}
-      <div className="mx-auto px-4 py-5 max-w-2xl">
-      <main>
+      <div className={`mx-auto px-4 py-5 transition-all duration-300 ${showMemo ? "max-w-5xl" : "max-w-2xl"}`}>
+      <div className="flex gap-5 items-start">
+      <main className="flex-1 min-w-0">
 
         {/* Tab Bar */}
         <div className="flex items-center gap-2 mb-5">
@@ -1061,17 +1062,15 @@ export default function App() {
         {/* Content */}
         {view==="schedule" ? renderScheduleTab() : renderGroups(getFiltered())}
       </main>
-      </div>
 
-      {/* ── Floating Memo Panel ───────────────────────────────── */}
+      {/* ── Memo Panel ────────────────────────────────────────── */}
       {showMemo && (
-        <div
-          className="fixed top-20 right-6 z-40 rounded-2xl overflow-hidden shadow-2xl"
-          style={{width: "320px", height: "420px", boxShadow: "0 8px 40px rgba(0,0,0,0.14)"}}
-        >
+        <aside className="w-72 flex-shrink-0 sticky top-20 rounded-2xl overflow-hidden shadow-sm border border-gray-100" style={{height: "calc(100vh - 96px)"}}>
           <MemoPanel onClose={() => setShowMemo(false)}/>
-        </div>
+        </aside>
       )}
+      </div>
+      </div>
 
       {/* ── Modals ────────────────────────────────────────────── */}
       {showForm && (
