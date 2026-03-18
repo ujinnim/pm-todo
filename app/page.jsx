@@ -579,9 +579,9 @@ function MemoPanel({ onClose }) {
   }
 
   return (
-    <div className="flex flex-col h-full bg-white border-l border-gray-100">
+    <div className="flex flex-col h-full bg-white">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 flex-shrink-0">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-50 flex-shrink-0">
         <div className="flex items-center gap-2">
           <NotebookPen size={14} className="text-[#1E5F52]"/>
           <span className="text-sm font-semibold text-gray-800">메모</span>
@@ -605,7 +605,7 @@ function MemoPanel({ onClose }) {
         style={{ fontFamily: "inherit" }}
       />
       {/* Footer */}
-      <div className="px-4 py-2 border-t border-gray-100 flex-shrink-0">
+      <div className="px-4 py-2 border-t border-gray-50 flex-shrink-0">
         <div className="flex items-center justify-between">
           <span className="text-[10px] text-gray-300">{text.length}자</span>
           {text.length > 0 && (
@@ -800,7 +800,7 @@ export default function App() {
     const pinned = eff === "today"
 
     return (
-      <div className={`flex items-start gap-3 px-4 py-3 group hover:bg-gray-50 transition-colors ${!isLast?"border-b border-gray-100":""}`}>
+      <div className={`flex items-start gap-3 px-4 py-3 group hover:bg-gray-50/70 transition-colors ${!isLast?"border-b border-gray-50":""}`}>
         <button
           onClick={() => toggleDone(t.id)}
           className={`mt-0.5 flex-shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${t.done?"bg-[#1E5F52] border-[#1E5F52]":"border-gray-300 hover:border-[#1E5F52]"}`}
@@ -862,9 +862,9 @@ export default function App() {
             <span className="text-xs font-semibold text-gray-400 bg-gray-100 rounded-full px-2 py-0.5">{g.tasks.length}</span>
             {proj&&proj.open_date&&<span className="text-xs text-gray-400 ml-auto">{fmtDate(proj.open_date)} 오픈</span>}
           </div>
-          <Card className="overflow-hidden">
+          <div className="bg-white rounded-xl overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
             {g.tasks.map((t, i, a) => <TaskRow key={t.id} t={t} isLast={i===a.length-1}/>)}
-          </Card>
+          </div>
         </div>
       )
     })
@@ -900,7 +900,7 @@ export default function App() {
               </button>
             </div>
             {showPhaseForm && (
-              <Card className="p-4 mb-3 flex flex-col gap-3">
+              <div className="bg-white rounded-xl p-4 mb-3 flex flex-col gap-3 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
                 <div className="flex items-center gap-3">
                   <ColorPicker value={phaseForm.color} onChange={c=>setPhaseForm(f=>({...f,color:c}))}/>
                   <Input placeholder="단계 이름" value={phaseForm.name} onChange={e=>setPhaseForm(f=>({...f,name:e.target.value}))} className="flex-1"/>
@@ -916,7 +916,7 @@ export default function App() {
                 <Button onClick={submitPhase} className="w-full bg-[#1E5F52] hover:bg-[#164A3F]">
                   {editPhaseId?"저장":"단계 추가"}
                 </Button>
-              </Card>
+              </div>
             )}
           </div>
         )}
@@ -925,7 +925,7 @@ export default function App() {
         {fp.length > 0 && (
           <div className="mb-4">
             <div className="text-xs font-semibold text-gray-500 mb-2">등록된 단계</div>
-            <Card className="overflow-hidden">
+            <div className="bg-white rounded-xl overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
               {fp.map((ph, i, a) => {
                 const proj = projOf(ph.project_id)
                 return (
@@ -946,15 +946,15 @@ export default function App() {
                   </div>
                 )
               })}
-            </Card>
+            </div>
           </div>
         )}
 
         {/* Calendar */}
         <div className="text-xs font-semibold text-gray-500 mb-2">월별 캘린더</div>
-        <Card className="p-4">
+        <div className="bg-white rounded-xl p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
           <DraggableCalendar phases={fp} projects={projects} calDate={calDate} setCalDate={setCalDate} onUpdatePhase={updatePhase}/>
-        </Card>
+        </div>
       </div>
     )
   }
@@ -1061,7 +1061,7 @@ export default function App() {
 
       {/* ── Memo Panel ────────────────────────────────────────── */}
       {showMemo && (
-        <aside className="w-72 flex-shrink-0 sticky top-20 rounded-2xl overflow-hidden border border-gray-100 shadow-sm" style={{height: "calc(100vh - 96px)"}}>
+        <aside className="w-72 flex-shrink-0 sticky top-20 rounded-2xl overflow-hidden shadow-sm" style={{height: "calc(100vh - 96px)"}}>
           <MemoPanel onClose={() => setShowMemo(false)}/>
         </aside>
       )}
