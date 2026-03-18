@@ -569,29 +569,48 @@ function TodayPanel({ phases, projects, ts, onClose }) {
   const activePhases = phases.filter(p => p.start_date <= ts && p.end_date >= ts)
 
   return (
-    <div className="flex flex-col h-full bg-white">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 flex-shrink-0">
-        <span className="text-sm font-bold text-gray-900">{month}월 {date}일 {dayName}요일</span>
-        <button onClick={onClose} className="w-6 h-6 rounded-md hover:bg-gray-100 flex items-center justify-center text-gray-400 transition-colors">
-          <X size={13}/>
-        </button>
+    <div className="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100 w-56">
+      {/* Header */}
+      <div className="px-4 pt-4 pb-3">
+        <div className="flex items-start justify-between">
+          <div>
+            <div className="text-[10px] font-semibold text-[#1E5F52] uppercase tracking-widest mb-0.5">Today</div>
+            <div className="text-base font-bold text-gray-900">{month}월 {date}일</div>
+            <div className="text-xs text-gray-400">{dayName}요일</div>
+          </div>
+          <button onClick={onClose} className="w-6 h-6 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-300 transition-colors mt-0.5">
+            <X size={12}/>
+          </button>
+        </div>
+        <div className="mt-3 h-px bg-gradient-to-r from-[#1E5F52]/20 via-[#1E5F52]/10 to-transparent"/>
       </div>
-      <div className="flex-1 overflow-y-auto px-4 py-3">
+      {/* Content */}
+      <div className="px-4 pb-4">
         {activePhases.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-14 text-gray-400">
-            <Calendar size={24} className="mb-2 opacity-30"/>
-            <p className="text-xs">진행 중인 일정이 없어요</p>
+          <div className="flex flex-col items-center py-6 text-gray-300">
+            <Calendar size={20} className="mb-1.5"/>
+            <p className="text-xs">진행 중인 일정 없음</p>
           </div>
         ) : (
           <div className="space-y-2">
             {activePhases.map(ph => {
               const proj = projOf(ph.project_id)
+              const total = diffDays(ph.start_date, ph.end_date) + 1
+              const elapsed = diffDays(ph.start_date, ts) + 1
+              const pct = Math.min(100, Math.round((elapsed / total) * 100))
               return (
-                <div key={ph.id} className="flex items-start gap-2.5 py-1">
-                  <span className="w-2 h-2 rounded-full flex-shrink-0 mt-1" style={{background: ph.color}}/>
-                  <div className="min-w-0">
-                    {proj && <div className="text-xs text-gray-400 leading-tight">{proj.name}</div>}
-                    <div className="text-sm font-semibold text-gray-800 leading-snug">{ph.name}</div>
+                <div key={ph.id} className="rounded-xl p-2.5" style={{background: ph.color + "12"}}>
+                  {proj && (
+                    <div className="text-[9px] font-semibold uppercase tracking-wide mb-0.5" style={{color: ph.color + "bb"}}>
+                      {proj.name}
+                    </div>
+                  )}
+                  <div className="text-xs font-semibold text-gray-800 leading-snug mb-1.5">{ph.name}</div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="flex-1 h-1 rounded-full bg-gray-100 overflow-hidden">
+                      <div className="h-full rounded-full" style={{width: pct+"%", background: ph.color}}/>
+                    </div>
+                    <span className="text-[9px] font-medium" style={{color: ph.color}}>{pct}%</span>
                   </div>
                 </div>
               )
@@ -1125,7 +1144,7 @@ export default function App() {
 
       {/* ── Today Panel ───────────────────────────────────────── */}
       {showToday && (
-        <aside className="rounded-2xl overflow-hidden shadow-sm border border-gray-100" style={{position: "fixed", right: "calc(50% + 356px)", top: "80px", width: "256px", height: "calc(100vh - 96px)"}}>
+        <aside style={{position: "fixed", right: "calc(50% + 356px)", top: "80px"}}>
           <TodayPanel
             phases={phases} projects={projects} ts={ts}
             onClose={() => setShowToday(false)}
