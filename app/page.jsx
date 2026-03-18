@@ -557,6 +557,117 @@ function ProjectManager({
   )
 }
 
+// ── Today Panel ──────────────────────────────────────────────────
+function TodayPanel({ phases, tasks, projects, ts, onClose }) {
+  const d = new Date()
+  const dayNames = ["일","월","화","수","목","금","토"]
+  const dayName = dayNames[d.getDay()]
+  const month = d.getMonth() + 1
+  const date = d.getDate()
+
+  const projOf = id => projects.find(p => p.id === id)
+
+  const activePhases = phases
+    .filter(p => p.start_date <= ts && p.end_date >= ts)
+    .map(p => {
+      const total = Math.max(1, diffDays(p.start_date, p.end_date))
+      const elapsed = diffDays(p.start_date, ts)
+      const progress = Math.round((elapsed / total) * 100)
+      const daysLeft = diffDays(ts, p.end_date)
+      return { ...p, project: projOf(p.project_id), progress: Math.min(100, Math.max(0, progress)), daysLeft }
+    })
+
+  const getEff = (task) => {
+    if (task.schedule === "today") return "today"
+    if (task.schedule === "date" && task.schedule_date) return task.schedule_date <= ts ? "today" : "backlog"
+    return "none"
+  }
+  const todayTasks = tasks.filter(t => !t.done && getEff(t) === "today")
+
+  return (
+    <div className="flex flex-col h-full bg-white">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-50 flex-shrink-0">
+        <div>
+          <div className="text-[10px] text-gray-400 font-medium mb-0.5">TODAY</div>
+          <div className="text-sm font-bold text-gray-900">{month}월 {date}일 {dayName}요일</div>
+        </div>
+        <button
+          onClick={onClose}
+          className="w-6 h-6 rounded-md hover:bg-gray-100 flex items-center justify-center text-gray-400 transition-colors"
+        >
+          <X size={13}/>
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
+        {/* Active Phases */}
+        {activePhases.length > 0 && (
+          <div>
+            <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">진행 중인 단계</div>
+            <div className="space-y-2">
+              {activePhases.map(ph => (
+                <div key={ph.id} className="rounded-xl border border-gray-100 p-3 bg-gray-50/50">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <span className="w-2 h-2 rounded-sm flex-shrink-0" style={{background: ph.color}}/>
+                    <span className="text-xs font-semibold text-gray-800 flex-1 min-w-0 truncate">{ph.name}</span>
+                    <span className={`text-[10px] font-semibold flex-shrink-0 ${ph.daysLeft <= 3 ? "text-orange-500" : "text-gray-400"}`}>
+                      D-{ph.daysLeft}
+                    </span>
+                  </div>
+                  {ph.project && (
+                    <div className="flex items-center gap-1 mb-2">
+                      <span className="w-1.5 h-1.5 rounded-full" style={{background: ph.project.color}}/>
+                      <span className="text-[10px] text-gray-400">{ph.project.name}</span>
+                    </div>
+                  )}
+                  <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="h-full rounded-full transition-all" style={{width: `${ph.progress}%`, background: ph.color}}/>
+                  </div>
+                  <div className="flex justify-between text-[10px] text-gray-400 mt-1">
+                    <span>{fmtDate(ph.start_date)}</span>
+                    <span className="font-medium">{ph.progress}%</span>
+                    <span>{fmtDate(ph.end_date)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Today's tasks */}
+        {todayTasks.length > 0 && (
+          <div>
+            <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+              오늘 할 일
+              <span className="ml-1.5 bg-[#1E5F52]/10 text-[#1E5F52] rounded-full px-1.5 py-0.5 normal-case">{todayTasks.length}</span>
+            </div>
+            <div className="space-y-1">
+              {todayTasks.map(t => {
+                const proj = t.project_id ? projOf(t.project_id) : null
+                return (
+                  <div key={t.id} className="flex items-start gap-2 py-1.5">
+                    <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{background: proj ? proj.color : '#9ca3af'}}/>
+                    <span className="text-xs text-gray-700 leading-relaxed">{t.title}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {activePhases.length === 0 && todayTasks.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-14 text-gray-400">
+            <Calendar size={28} className="mb-2 opacity-30"/>
+            <p className="text-xs">오늘 일정이 없어요</p>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ── Memo Panel ───────────────────────────────────────────────────
 function MemoPanel({ onClose }) {
   const [text, setText] = useState(() => {
@@ -647,6 +758,9 @@ export default function App() {
 
   // Memo panel
   const [showMemo, setShowMemo] = useState(false)
+
+  // Today panel
+  const [showToday, setShowToday] = useState(false)
 
   // Views & calendar
   const [view, setView] = useState("all")
@@ -1015,6 +1129,17 @@ export default function App() {
 
         {/* Tab Bar */}
         <div className="flex items-center gap-2 mb-5">
+          <button
+            onClick={() => setShowToday(v => !v)}
+            title="오늘 일정"
+            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all flex-shrink-0 ${
+              showToday
+                ? "bg-[#1E5F52] text-white shadow-md shadow-[#C2D9D4]"
+                : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+            }`}
+          >
+            <Clock size={15}/>
+          </button>
           <div className="flex flex-1 bg-white rounded-xl p-1 gap-1 border border-gray-200 shadow-sm">
             {tabs.map(tab => (
               <button
@@ -1062,6 +1187,16 @@ export default function App() {
         {/* Content */}
         {view==="schedule" ? renderScheduleTab() : renderGroups(getFiltered())}
       </main>
+
+      {/* ── Today Panel ───────────────────────────────────────── */}
+      {showToday && (
+        <aside className="rounded-2xl overflow-hidden shadow-sm border border-gray-100" style={{position: "fixed", right: "calc(50% + 356px)", top: "80px", width: "256px", height: "calc(100vh - 96px)"}}>
+          <TodayPanel
+            phases={phases} tasks={tasks} projects={projects} ts={ts}
+            onClose={() => setShowToday(false)}
+          />
+        </aside>
+      )}
 
       {/* ── Memo Panel ────────────────────────────────────────── */}
       {showMemo && (
