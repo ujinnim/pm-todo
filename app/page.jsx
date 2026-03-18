@@ -11,7 +11,7 @@ import {
   Plus, Calendar, CheckCircle2, Circle, Pin, PinOff,
   Pencil, Trash2, ChevronLeft, ChevronRight, X,
   Inbox, Clock, Archive, LayoutGrid, FolderKanban,
-  Check, Loader2, NotebookPen
+  Check, Loader2, NotebookPen, GripVertical
 } from "lucide-react"
 
 const COLORS = [
@@ -469,7 +469,10 @@ function ProjectManager({
   newProjName, setNewProjName, newProjColor, setNewProjColor, newProjOpenDate, setNewProjOpenDate,
   showNewProjForm, setShowNewProjForm,
   editingProjId, setEditingProjId, editingProjName, setEditingProjName, editingProjColor, setEditingProjColor, editingProjOpenDate, setEditingProjOpenDate,
+  onReorderProjects,
 }) {
+  const [dragProjId, setDragProjId] = useState(null)
+  const [dragOverProjId, setDragOverProjId] = useState(null)
   const active = projects.filter(p => !p.done)
   const completed = projects.filter(p => p.done)
   return (
@@ -490,7 +493,14 @@ function ProjectManager({
             <p className="text-sm text-gray-400 text-center py-6">등록된 과제가 없어요</p>
           )}
           {active.map(p => (
-            <div key={p.id} className="rounded-xl border border-gray-100 bg-gray-50 p-3">
+            <div key={p.id}
+              draggable={editingProjId !== p.id}
+              onDragStart={e => { if(editingProjId===p.id)return; setDragProjId(p.id); e.dataTransfer.effectAllowed="move" }}
+              onDragOver={e => { e.preventDefault(); if(dragProjId)setDragOverProjId(p.id) }}
+              onDrop={e => { e.preventDefault(); if(dragProjId&&dragProjId!==p.id)onReorderProjects(dragProjId,p.id); setDragProjId(null); setDragOverProjId(null) }}
+              onDragEnd={() => { setDragProjId(null); setDragOverProjId(null) }}
+              className={`rounded-xl border border-gray-100 bg-gray-50 p-3 transition-all ${dragProjId===p.id?"opacity-40":""}${dragOverProjId===p.id&&dragProjId!==p.id?" ring-2 ring-[#1E5F52]/25 bg-[#EAF0EE]/40":""}`}
+            >
               {editingProjId === p.id ? (
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2">
@@ -507,7 +517,8 @@ function ProjectManager({
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <GripVertical size={14} className="text-gray-300 cursor-grab flex-shrink-0"/>
                   <span className="w-3 h-3 rounded-sm flex-shrink-0" style={{background:p.color}}/>
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium text-gray-800 truncate">{p.name}</div>
@@ -718,6 +729,24 @@ export default function App() {
   // Today panel
   const [showToday, setShowToday] = useState(false)
 
+  // Drag-and-drop order (localStorage persisted)
+  const [projOrder, setProjOrder] = useState(() => {
+    if (typeof window !== "undefined") {
+      const s = localStorage.getItem("pm-todo-proj-order")
+      return s ? JSON.parse(s) : []
+    }
+    return []
+  })
+  const [taskOrder, setTaskOrder] = useState(() => {
+    if (typeof window !== "undefined") {
+      const s = localStorage.getItem("pm-todo-task-order")
+      return s ? JSON.parse(s) : []
+    }
+    return []
+  })
+  const [dragTaskId, setDragTaskId] = useState(null)
+  const [dragOverTaskId, setDragOverTaskId] = useState(null)
+
   // Views & calendar
   const [view, setView] = useState("all")
   const [calDate, setCalDate] = useState(() => { const d=new Date(); return {y:d.getFullYear(),m:d.getMonth()} })
@@ -844,6 +873,36 @@ export default function App() {
     await supabase.from("phases").update(updates).eq("id", id)
   }
 
+  // ── Drag-and-drop order helpers ───────────────────────────────
+  function getSortedProjects(list) {
+    if (projOrder.length === 0) return list
+    const om = {}; projOrder.forEach((id, i) => { om[id] = i })
+    return [...list].sort((a, b) => (om[a.id] ?? 9999) - (om[b.id] ?? 9999))
+  }
+  function reorderProjects(fromId, toId) {
+    if (fromId === toId) return
+    const ids = getSortedProjects(projects).map(p => p.id)
+    const fi = ids.indexOf(fromId), ti = ids.indexOf(toId)
+    if (fi === -1 || ti === -1) return
+    ids.splice(fi, 1); ids.splice(ti, 0, fromId)
+    setProjOrder(ids)
+    localStorage.setItem("pm-todo-proj-order", JSON.stringify(ids))
+  }
+  function getSortedTasks(list) {
+    if (taskOrder.length === 0) return list
+    const om = {}; taskOrder.forEach((id, i) => { om[id] = i })
+    return [...list].sort((a, b) => (om[a.id] ?? 9999) - (om[b.id] ?? 9999))
+  }
+  function reorderTasks(fromId, toId) {
+    if (fromId === toId) return
+    const ids = getSortedTasks(tasks).map(t => t.id)
+    const fi = ids.indexOf(fromId), ti = ids.indexOf(toId)
+    if (fi === -1 || ti === -1) return
+    ids.splice(fi, 1); ids.splice(ti, 0, fromId)
+    setTaskOrder(ids)
+    localStorage.setItem("pm-todo-task-order", JSON.stringify(ids))
+  }
+
   const undone = tasks.filter(t => !t.done)
   const done = tasks.filter(t => t.done)
   const todayCnt = undone.filter(t => getEff(t,ts)==="today").length
@@ -859,7 +918,7 @@ export default function App() {
   function groupByProject(list) {
     const groups = {}
     for (const t of list) { const key=t.project_id?String(t.project_id):"__none__"; if(!groups[key])groups[key]=[]; groups[key].push(t) }
-    const order = [...projects.map(p=>String(p.id)),"__none__"]
+    const order = [...getSortedProjects(projects).map(p=>String(p.id)),"__none__"]
     return order.filter(k=>groups[k]).map(k=>({key:k,tasks:groups[k]}))
   }
 
@@ -868,9 +927,21 @@ export default function App() {
     const eff = getEff(t, ts)
     const hasMemo = t.memo && t.memo.trim()
     const pinned = eff === "today"
+    const isDragging = dragTaskId === t.id
+    const isDragOver = dragOverTaskId === t.id && dragTaskId !== t.id
 
     return (
-      <div className={`flex items-start gap-3 px-4 py-3 group hover:bg-gray-50/70 transition-colors ${!isLast?"border-b border-gray-50":""}`}>
+      <div
+        draggable
+        onDragStart={e => { setDragTaskId(t.id); e.dataTransfer.effectAllowed = "move" }}
+        onDragOver={e => { e.preventDefault(); setDragOverTaskId(t.id) }}
+        onDrop={e => { e.preventDefault(); if (dragTaskId && dragTaskId !== t.id) reorderTasks(dragTaskId, t.id); setDragTaskId(null); setDragOverTaskId(null) }}
+        onDragEnd={() => { setDragTaskId(null); setDragOverTaskId(null) }}
+        className={`flex items-start gap-2 px-4 py-3 group hover:bg-gray-50/70 transition-colors ${!isLast?"border-b border-gray-50":""}${isDragging?" opacity-40":""}${isDragOver?" bg-[#EAF0EE]/60":""}`}
+      >
+        <div className="mt-1 flex-shrink-0 text-gray-200 group-hover:text-gray-300 transition-colors cursor-grab">
+          <GripVertical size={14}/>
+        </div>
         <button
           onClick={() => toggleDone(t.id)}
           className={`mt-0.5 flex-shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${t.done?"bg-[#1E5F52] border-[#1E5F52]":"border-gray-300 hover:border-[#1E5F52]"}`}
@@ -933,7 +1004,7 @@ export default function App() {
             {proj&&proj.open_date&&<span className="text-xs text-gray-400 ml-auto">{fmtDate(proj.open_date)} 오픈</span>}
           </div>
           <div className="bg-white rounded-xl overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
-            {g.tasks.map((t, i, a) => <TaskRow key={t.id} t={t} isLast={i===a.length-1}/>)}
+            {getSortedTasks(g.tasks).map((t, i, a) => <TaskRow key={t.id} t={t} isLast={i===a.length-1}/>)}
           </div>
         </div>
       )
@@ -1174,7 +1245,7 @@ export default function App() {
 
       {showProjMgr && (
         <ProjectManager
-          projects={projects}
+          projects={getSortedProjects(projects)}
           phases={phases}
           onClose={() => setShowProjMgr(false)}
           onAddProject={addProject}
@@ -1189,6 +1260,7 @@ export default function App() {
           editingProjName={editingProjName} setEditingProjName={setEditingProjName}
           editingProjColor={editingProjColor} setEditingProjColor={setEditingProjColor}
           editingProjOpenDate={editingProjOpenDate} setEditingProjOpenDate={setEditingProjOpenDate}
+          onReorderProjects={reorderProjects}
         />
       )}
     </div>
