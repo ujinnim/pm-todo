@@ -595,9 +595,6 @@ function TodayPanel({ phases, projects, ts, onClose }) {
           <div className="space-y-2">
             {activePhases.map(ph => {
               const proj = projOf(ph.project_id)
-              const total = diffDays(ph.start_date, ph.end_date) + 1
-              const elapsed = diffDays(ph.start_date, ts) + 1
-              const pct = Math.min(100, Math.round((elapsed / total) * 100))
               return (
                 <div key={ph.id} className="rounded-xl p-2.5" style={{background: ph.color + "12"}}>
                   {proj && (
@@ -605,13 +602,7 @@ function TodayPanel({ phases, projects, ts, onClose }) {
                       {proj.name}
                     </div>
                   )}
-                  <div className="text-xs font-semibold text-gray-800 leading-snug mb-1.5">{ph.name}</div>
-                  <div className="flex items-center gap-1.5">
-                    <div className="flex-1 h-1 rounded-full bg-gray-100 overflow-hidden">
-                      <div className="h-full rounded-full" style={{width: pct+"%", background: ph.color}}/>
-                    </div>
-                    <span className="text-[9px] font-medium" style={{color: ph.color}}>{pct}%</span>
-                  </div>
+                  <div className="text-xs font-semibold text-gray-800 leading-snug">{ph.name}</div>
                 </div>
               )
             })}
