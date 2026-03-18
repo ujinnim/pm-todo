@@ -587,12 +587,12 @@ function TodayPanel({ phases, projects, ts, onClose }) {
             {activePhases.map(ph => {
               const proj = projOf(ph.project_id)
               return (
-                <div key={ph.id} className="flex items-center gap-2 py-1">
-                  <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{background: ph.color}}/>
-                  <span className="text-sm text-gray-800 min-w-0">
-                    {proj && <span className="text-gray-400">{proj.name} </span>}
-                    <span className="font-medium">- {ph.name}</span>
-                  </span>
+                <div key={ph.id} className="flex items-start gap-2.5 py-1">
+                  <span className="w-2 h-2 rounded-full flex-shrink-0 mt-1" style={{background: ph.color}}/>
+                  <div className="min-w-0">
+                    {proj && <div className="text-xs text-gray-400 leading-tight">{proj.name}</div>}
+                    <div className="text-sm font-semibold text-gray-800 leading-snug">{ph.name}</div>
+                  </div>
                 </div>
               )
             })}
