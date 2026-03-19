@@ -370,11 +370,15 @@ function TaskForm({ form, setForm, editId, onSubmit, onCancel, projects, ts }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4" onClick={onCancel}>
       <div className="absolute inset-0 bg-black/40"/>
-      <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+      <form
+        className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden"
+        onClick={e => e.stopPropagation()}
+        onSubmit={e => { e.preventDefault(); onSubmit() }}
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-gray-100">
           <h2 className="text-base font-semibold text-gray-900">{editId ? "할 일 편집" : "새 할 일"}</h2>
-          <button onClick={onCancel} className="w-7 h-7 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400 transition-colors">
+          <button type="button" onClick={onCancel} className="w-7 h-7 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400 transition-colors">
             <X size={16}/>
           </button>
         </div>
@@ -385,7 +389,6 @@ function TaskForm({ form, setForm, editId, onSubmit, onCancel, projects, ts }) {
               placeholder="할 일을 입력하세요"
               value={form.title}
               onChange={e => setForm(f => ({...f, title: e.target.value}))}
-              onKeyDown={e => { if(e.key==="Enter") { e.preventDefault(); onSubmit() } }}
               autoFocus
               className="text-base font-medium h-11"
             />
@@ -455,10 +458,10 @@ function TaskForm({ form, setForm, editId, onSubmit, onCancel, projects, ts }) {
         </div>
         {/* Footer */}
         <div className="flex gap-2 px-5 pb-5">
-          <Button onClick={onCancel} variant="outline" className="flex-1">취소</Button>
-          <Button onClick={onSubmit} className="flex-1 bg-[#1E5F52] hover:bg-[#164A3F]">{editId ? "저장" : "추가"}</Button>
+          <Button type="button" onClick={onCancel} variant="outline" className="flex-1">취소</Button>
+          <Button type="submit" className="flex-1 bg-[#1E5F52] hover:bg-[#164A3F]">{editId ? "저장" : "추가"}</Button>
         </div>
-      </div>
+      </form>
     </div>
   )
 }
