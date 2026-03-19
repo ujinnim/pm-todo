@@ -968,19 +968,19 @@ export default function App() {
           e.currentTarget.style.opacity = ""
           dragTaskRef.current = null
         }}
-        className={`flex items-start gap-2 px-4 py-3 group hover:bg-gray-50/70 transition-colors ${!isLast?"border-b border-gray-50":""}`}
+        className={`flex items-center gap-2 px-4 py-3 group hover:bg-gray-50/70 transition-colors ${!isLast?"border-b border-gray-50":""}`}
       >
-        <div className="mt-1 flex-shrink-0 text-gray-200 group-hover:text-gray-300 transition-colors cursor-grab">
+        <div className="flex-shrink-0 text-gray-200 group-hover:text-gray-300 transition-colors cursor-grab">
           <GripVertical size={14}/>
         </div>
         <button
           onClick={() => toggleDone(t.id)}
-          className={`mt-0.5 flex-shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${t.done?"bg-[#1E5F52] border-[#1E5F52]":"border-gray-300 hover:border-[#1E5F52]"}`}
+          className={`flex-shrink-0 w-5 h-5 rounded-md border flex items-center justify-center transition-all ${t.done?"bg-[#1E5F52] border-[#1E5F52]":"border-gray-200 hover:border-[#1E5F52]"}`}
         >
           {t.done && <Check size={10} className="text-white" strokeWidth={3}/>}
         </button>
         <div className={`flex-1 min-w-0 ${t.done?"opacity-40":""}`}>
-          <div className="flex flex-wrap items-center gap-1.5 mb-0.5">
+          <div className="flex flex-wrap items-center gap-1.5">
             <span className={`text-sm font-medium text-gray-800 ${t.done?"line-through":""}`}>{t.title}</span>
             {t.schedule==="date"&&t.schedule_date&&(
               <Badge variant={t.schedule_date<=ts?"warning":"secondary"} className="text-[10px]">{fmtDate(t.schedule_date)}</Badge>
