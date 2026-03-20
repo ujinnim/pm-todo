@@ -774,6 +774,7 @@ export default function App() {
   const [phaseForm, setPhaseForm] = useState({name:"",start_date:"",end_date:"",color:COLORS[0]})
   const [editPhaseId, setEditPhaseId] = useState(null)
   const [showConfetti, setShowConfetti] = useState(false)
+  const [showDonePhases, setShowDonePhases] = useState(false)
 
   const ts = today()
 
@@ -1047,6 +1048,9 @@ export default function App() {
 
   function renderScheduleTab() {
     const fp = phases.filter(p => !selProj || p.project_id===Number(selProj))
+    const doneIds = new Set(projects.filter(p => p.done).map(p => p.id))
+    const fpList = showDonePhases ? fp : fp.filter(p => !doneIds.has(p.project_id))
+    const hiddenCnt = fp.filter(p => doneIds.has(p.project_id)).length
     return (
       <div>
         {/* Project selector */}
@@ -1099,9 +1103,19 @@ export default function App() {
         {/* Phase list */}
         {fp.length > 0 && (
           <div className="mb-4">
-            <div className="text-xs font-semibold text-gray-500 mb-2">등록된 단계</div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold text-gray-500">등록된 단계</span>
+              {hiddenCnt > 0 && (
+                <button
+                  onClick={() => setShowDonePhases(v => !v)}
+                  className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  {showDonePhases ? "완료 과제 숨기기" : `완료 과제 +${hiddenCnt}`}
+                </button>
+              )}
+            </div>
             <div className="bg-white rounded-xl overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
-              {fp.map((ph, i, a) => {
+              {fpList.map((ph, i, a) => {
                 const proj = projOf(ph.project_id)
                 return (
                   <div key={ph.id} className={`flex items-center gap-3 px-4 py-3 group hover:bg-gray-50 ${i!==a.length-1?"border-b border-gray-100":""}`}>
