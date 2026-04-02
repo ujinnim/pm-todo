@@ -775,6 +775,7 @@ export default function App() {
   const [editPhaseId, setEditPhaseId] = useState(null)
   const [showConfetti, setShowConfetti] = useState(false)
   const [showDonePhases, setShowDonePhases] = useState(false)
+  const [showPastPhases, setShowPastPhases] = useState(false)
 
   const ts = today()
 
@@ -1048,9 +1049,12 @@ export default function App() {
 
   function renderScheduleTab() {
     const fp = phases.filter(p => !selProj || p.project_id===Number(selProj))
+    const today = new Date().toISOString().slice(0,10)
     const doneIds = new Set(projects.filter(p => p.done).map(p => p.id))
-    const fpList = showDonePhases ? fp : fp.filter(p => !doneIds.has(p.project_id))
-    const hiddenCnt = fp.filter(p => doneIds.has(p.project_id)).length
+    const pastCnt = fp.filter(p => p.end_date < today).length
+    const fpVisible = showPastPhases ? fp : fp.filter(p => p.end_date >= today)
+    const fpList = showDonePhases ? fpVisible : fpVisible.filter(p => !doneIds.has(p.project_id))
+    const hiddenCnt = fpVisible.filter(p => doneIds.has(p.project_id)).length
     return (
       <div>
         {/* Project selector */}
@@ -1105,14 +1109,24 @@ export default function App() {
           <div className="mb-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-semibold text-gray-500">등록된 단계</span>
-              {hiddenCnt > 0 && (
-                <button
-                  onClick={() => setShowDonePhases(v => !v)}
-                  className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  {showDonePhases ? "완료 과제 숨기기" : `완료 과제 +${hiddenCnt}`}
-                </button>
-              )}
+              <div className="flex items-center gap-2">
+                {pastCnt > 0 && (
+                  <button
+                    onClick={() => setShowPastPhases(v => !v)}
+                    className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    {showPastPhases ? "지난 단계 숨기기" : `지난 단계 +${pastCnt}`}
+                  </button>
+                )}
+                {hiddenCnt > 0 && (
+                  <button
+                    onClick={() => setShowDonePhases(v => !v)}
+                    className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    {showDonePhases ? "완료 과제 숨기기" : `완료 과제 +${hiddenCnt}`}
+                  </button>
+                )}
+              </div>
             </div>
             <div className="bg-white rounded-xl overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
               {fpList.map((ph, i, a) => {
