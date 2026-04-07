@@ -28,7 +28,9 @@ function today() {
 function fmtDate(d) {
   if (!d) return ""
   const p = d.split("-")
-  return parseInt(p[1]) + "/" + parseInt(p[2])
+  const days = ["일","월","화","수","목","금","토"]
+  const day = new Date(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2])).getDay()
+  return parseInt(p[1]) + "/" + parseInt(p[2]) + "(" + days[day] + ")"
 }
 function addDays(dateStr, n) {
   const d = new Date(dateStr)
