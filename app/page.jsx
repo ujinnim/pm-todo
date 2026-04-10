@@ -849,8 +849,9 @@ export default function App() {
   async function toggleDone(id) {
     const t = tasks.find(x => x.id===id); if (!t) return
     if (!t.done) setShowConfetti(true)
-    setTasks(t2 => t2.map(x => x.id===id?{...x,done:!x.done}:x))
-    await supabase.from("tasks").update({done:!t.done}).eq("id", id)
+    const done_at = !t.done ? ts : null
+    setTasks(t2 => t2.map(x => x.id===id?{...x,done:!x.done,done_at}:x))
+    await supabase.from("tasks").update({done:!t.done, done_at}).eq("id", id)
   }
   async function moveTask(t) {
     const eff = getEff(t, ts)
@@ -945,6 +946,18 @@ export default function App() {
     return order.filter(k=>groups[k]).map(k=>({key:k,tasks:groups[k]}))
   }
 
+  function groupByDoneDate(list) {
+    const groups = {}
+    for (const t of list) {
+      const key = t.done_at || "__unknown__"
+      if (!groups[key]) groups[key] = []
+      groups[key].push(t)
+    }
+    return Object.keys(groups)
+      .sort((a,b) => b.localeCompare(a))
+      .map(k => ({key:k, tasks:groups[k]}))
+  }
+
   // ── Task Row ──────────────────────────────────────────────────
   function TaskRow({ t, isLast }) {
     const eff = getEff(t, ts)
@@ -1020,6 +1033,30 @@ export default function App() {
         </div>
       </div>
     )
+  }
+
+  function renderDoneGroups(list) {
+    const groups = groupByDoneDate(list)
+    if (groups.length === 0) return (
+      <div className="flex flex-col items-center justify-center py-20 text-gray-400">
+        <Inbox size={32} className="mb-3 opacity-30"/>
+        <p className="text-sm">완료한 항목이 없어요</p>
+      </div>
+    )
+    return groups.map(g => {
+      const label = g.key === "__unknown__" ? "날짜 미상" : fmtDate(g.key)
+      return (
+        <div key={g.key} className="mb-5">
+          <div className="flex items-center gap-2 mb-2 px-1">
+            <span className="text-xs font-semibold text-gray-700">{label}</span>
+            <span className="text-xs font-semibold text-gray-400 bg-gray-100 rounded-full px-2 py-0.5">{g.tasks.length}</span>
+          </div>
+          <div className="bg-white rounded-xl overflow-hidden shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+            {g.tasks.map((t, i, a) => <TaskRow key={t.id} t={t} isLast={i===a.length-1}/>)}
+          </div>
+        </div>
+      )
+    })
   }
 
   function renderGroups(list) {
@@ -1276,7 +1313,7 @@ export default function App() {
         </div>
 
         {/* Content */}
-        {view==="schedule" ? renderScheduleTab() : renderGroups(getFiltered())}
+        {view==="schedule" ? renderScheduleTab() : view==="done" ? renderDoneGroups(getFiltered()) : renderGroups(getFiltered())}
       </main>
 
       {/* ── Today Panel ───────────────────────────────────────── */}
